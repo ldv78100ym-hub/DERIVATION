@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Dérivées</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f9; color: #333; line-height: 1.6; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .exercise { margin: 20px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; min-height: 100px; }
+        .buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; justify-content: center; }
+        button { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 1rem; }
+        .btn-new { background: #3498db; color: white; }
+        .btn-solution { background: #27ae60; color: white; }
+        .btn-copyright { background: #95a5a6; color: white; }
+        button:hover { opacity: 0.8; transform: translateY(-1px); }
+        #solution-box { margin-top: 20px; padding: 20px; border-left: 6px solid #27ae60; background: #f9fdfa; display: none; border-radius: 0 8px 8px 0; }
+        .step { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px dashed #ced4da; }
+        .step:last-child { border-bottom: none; }
+        .step-title { font-weight: bold; color: #1e7e34; display: block; margin-bottom: 8px; text-transform: uppercase; font-size: 0.9em; }
+        
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
+        .modal-content { background: white; margin: 10% auto; padding: 30px; width: 40%; border-radius: 15px; position: relative; box-shadow: 0 5px 30px rgba(0,0,0,0.3); }
+        .close { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: #aaa; }
+        .close:hover { color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calcul de Dérivées</h1>
+    
+    <div id="exercise-area" class="exercise">
+        <p id="consigne" style="font-style: italic; color: #555; font-size: 1.1em;">Cliquez sur le bouton ci-dessous pour générer un exercice.</p>
+        <div id="math-display" style="font-size: 1.4em; text-align: center; margin: 25px 0; color: #2c3e50;"></div>
+    </div>
+
+    <div class="buttons">
+        <button class="btn-new" onclick="generateExercise()">Nouvel exercice</button>
+        <button id="btn-sol" class="btn-solution" onclick="toggleSolution()" style="display:none;">Solution détaillée</button>
+        <button class="btn-copyright" onclick="openCopyright()">© Droits d'auteur</button>
+    </div>
+
+    <div id="solution-box"></div>
+</div>
+
+<div id="copyModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeCopyright()">&times;</span>
+        <p><strong>⚖️ Droits d'Auteur et Licence</strong></p>
+        <br>Auteur : Yann Merdy (yann.merdy@gmail.com)
+	<br>Date : Janvier 2026
+
+	<p><strong>Licence d'Utilisation Non Commerciale</strong></p>
+	<p>Ce code HTML/CSS/JavaScript ainsi que le contenu généré sont la propriété intellectuelle exclusive de l'auteur.</p>
+
+	<p><strong>✅ Utilisation Privée et Éducative :</strong> Vous êtes autorisé.e à utiliser, copier, modifier et distribuer ce code à des fins personnelles, éducatives et non lucratives.</p>
+	<p><strong>🚫 Utilisation Commerciale :</strong> Toute utilisation commerciale ou professionnelle est strictement interdite sans accord écrit.</p>
+	<p><strong>✍️ Attribution :</strong> Toute reproduction doit conserver la mention de l'auteur original.</p>
+    </div>
+</div>
+
+<script>
+    // --- Fonction demandée ---
+    function fmtSign(val, isFirst = false) {
+        if (val === 0) return isFirst ? "0" : ""; 
+        if (val > 0) {
+            return isFirst ? `${val}` : ` + ${val}`;
+        } else {
+            return isFirst ? `${val}` : ` - ${Math.abs(val)}`;
+        }
+    }
+
+    // --- Utilitaires Mathématiques ---
+    function getRandomInt(min, max) {
+        let res = Math.floor(Math.random() * (max - min + 1)) + min;
+        return res === 0 ? (min === 0 && max === 0 ? 0 : getRandomInt(min, max)) : res;
+    }
+
+    function gcd(a, b) {
+        a = Math.abs(a); b = Math.abs(b);
+        while (b) { a %= b; [a, b] = [b, a]; }
+        return a;
+    }
+
+    class Fraction {
+        constructor(n, d = 1) {
+            if (d === 0) d = 1;
+            let common = gcd(n, d);
+            this.n = (d < 0 ? -n : n) / common;
+            this.d = Math.abs(d) / common;
+        }
+        
+        toTex(isFirst = false) {
+            if (this.d === 1) return fmtSign(this.n, isFirst);
+            let sign = this.n < 0 ? "-" : (isFirst ? "" : "+");
+            return `${sign} \\dfrac{${Math.abs(this.n)}}{${this.d}}`;
+        }
+
+        toTexRaw() {
+            if (this.d === 1) return this.n < 0 ? `(${this.n})` : `${this.n}`;
+            return `\\left( \\dfrac{${this.n}}{${this.d}} \\right)`;
+        }
+
+        toTexNoSign() {
+            if (this.d === 1) return `${Math.abs(this.n)}`;
+            return `\\dfrac{${Math.abs(this.n)}}{${this.d}}`;
+        }
+    }
+
+    let currentEx = {};
+
+    function generateExercise() {
+        const types = [1, 2, 3, 4, 5];
+        const type = types[Math.floor(Math.random() * types.length)];
+        
+        const vars = ["x", "t", "\\theta"];
+        const funcs = ["f", "g", "p", "h", "q"];
+        const v = vars[Math.floor(Math.random() * vars.length)];
+        const f = funcs[Math.floor(Math.random() * funcs.length)];
+        const notationType = Math.random() > 0.5 ? "prime" : "frac";
+        const notation = notationType === "prime" ? `${f}'` : `\\dfrac{d${f}}{d${v}}`;
+
+        let data = { type, v, f, notation, notationType };
+
+        const getVal = () => Math.random() > 0.6 ? new Fraction(getRandomInt(-9, 9), getRandomInt(2, 5)) : new Fraction(getRandomInt(-10, 10));
+
+        if (type === 1) data.k = getVal();
+        else if (type === 2) { data.m = getVal(); data.p = getVal(); }
+        else if (type === 3) data.n = getRandomInt(2, 6);
+        else if (type === 4) { data.a = getVal(); data.b = getVal(); data.c = getVal(); }
+        else if (type === 5) { data.a = getVal(); data.b = getVal(); data.c = getVal(); data.d = getVal(); }
+
+        currentEx = data;
+        renderExercise();
+    }
+
+    function getReducedDeriv() {
+        const d = currentEx;
+        if (d.type === 1) return "0";
+        if (d.type === 2) return d.m.toTex(true);
+        if (d.type === 3) return `${d.n}${d.v}^{${d.n-1}}`;
+        if (d.type === 4) {
+            let f1 = new Fraction(d.a.n * 2, d.a.d);
+            let t1 = `${f1.toTex(true)}${d.v}`;
+            let t2 = d.b.toTex();
+            return t1 + (t2 === "" ? "" : t2);
+        }
+        if (d.type === 5) {
+            let f1 = new Fraction(d.a.n * 3, d.a.d);
+            let f2 = new Fraction(d.b.n * 2, d.b.d);
+            let t1 = `${f1.toTex(true)}${d.v}^2`;
+            let t2 = f2.toTex();
+            let t3 = d.c.toTex();
+            return t1 + (t2 === "" ? "" : t2 + d.v) + (t3 === "" ? "" : t3);
+        }
+    }
+
+    function renderExercise() {
+        const d = currentEx;
+        let funcExp = "";
+        
+        if (d.type === 1) funcExp = d.k.toTex(true);
+        else if (d.type === 2) funcExp = `${d.m.toTex(true)}${d.v} ${d.p.toTex()}`;
+        else if (d.type === 3) funcExp = `${d.v}^{${d.n}}`;
+        else if (d.type === 4) funcExp = `${d.a.toTex(true)}${d.v}^2 ${d.b.toTex()}${d.v} ${d.c.toTex()}`;
+        else if (d.type === 5) funcExp = `${d.a.toTex(true)}${d.v}^3 ${d.b.toTex()}${d.v}^2 ${d.c.toTex()}${d.v} ${d.d.toTex()}`;
+
+        const reducedDeriv = getReducedDeriv();
+        
+        // --- MISE À JOUR DE L'ÉNONCÉ ---
+        // 1. La définition de la fonction
+        document.getElementById('consigne').innerHTML = `Soit \\( ${d.f} \\) une fonction définie par \\( ${d.f}(${d.v}) = ${funcExp} \\).`;
+        
+        // 2. La question "Montrer que..." suivie de l'équation
+        // J'utilise un span pour réduire légèrement la taille du texte par rapport à l'équation pour un meilleur visuel
+        document.getElementById('math-display').innerHTML = 
+            `<span style="font-size:0.75em; color:#555; display:block; margin-bottom:5px;">Montrer que sa dérivée est</span>` +
+            `\\( ${d.notation}(${d.v}) = ${reducedDeriv} \\)`;
+        
+        document.getElementById('btn-sol').style.display = "inline-block";
+        document.getElementById('solution-box').style.display = "none";
+        MathJax.typesetPromise();
+    }
+
+    function buildSolution() {
+        const d = currentEx;
+        let s1_f = "", s1_d = "";
+        let s2_f = "", s2_d = "";
+        let s3_f = "", s3_d = getReducedDeriv();
+
+        // Étape 1 & 2 construction
+        if (d.type === 1) {
+            s1_f = "k"; s1_d = "0";
+            s2_f = d.k.toTex(true); s2_d = "0";
+        } else if (d.type === 2) {
+            s1_f = `m \\times ${d.v} + p`; s1_d = "m";
+            s2_f = `${d.m.toTex(true)}${d.v} ${d.p.toTex()}`;
+            s2_d = d.m.toTex(true);
+        } else if (d.type === 3) {
+            s1_f = `${d.v}^n`; s1_d = `n \\times ${d.v}^{n-1}`;
+            s2_f = `${d.v}^{${d.n}}`;
+            s2_d = `${d.n} \\times ${d.v}^{${d.n}-1}`;
+        } else if (d.type === 4) {
+            s1_f = `a \\times ${d.v}^2 + b \\times ${d.v} + c`; s1_d = `2 \\times a \\times ${d.v} + b`;
+            s2_f = `${d.a.toTex(true)}${d.v}^2 ${d.b.toTex()}${d.v} ${d.c.toTex()}`;
+            s2_d = `2 \\times ${d.a.toTexRaw()} \\times ${d.v} ${d.b.toTex()}`;
+        } else if (d.type === 5) {
+            s1_f = `a \\times ${d.v}^3 + b \\times ${d.v}^2 + c \\times ${d.v} + d`; 
+            s1_d = `3 \\times a \\times ${d.v}^2 + 2 \\times b \\times ${d.v} + c`;
+            s2_f = `${d.a.toTex(true)}${d.v}^3 ${d.b.toTex()}${d.v}^2 ${d.c.toTex()}${d.v} ${d.d.toTex()}`;
+            s2_d = `3 \\times ${d.a.toTexRaw()} \\times ${d.v}^2 + 2 \\times ${d.b.toTexRaw()} \\times ${d.v} ${d.c.toTex()}`;
+        }
+
+        s3_f = s2_f;
+
+        let html = `
+            <div class="step">
+                <span class="step-title">(1) Forme Littérale</span>
+                La fonction est de la forme : \\( ${d.f}(${d.v}) = ${s1_f} \\)<br>
+                Donc sa dérivée est de la forme \\( ${d.notation}(${d.v}) = ${s1_d} \\)
+            </div>
+            <div class="step">
+                <span class="step-title">(2) Application directe</span>
+                La fonction est de la forme : \\( ${d.f}(${d.v}) = ${s2_f} \\)<br>
+                Donc sa dérivée est de la forme \\( ${d.notation}(${d.v}) = ${s2_d} \\)
+            </div>
+            <div class="step">
+                <span class="step-title">(3) Expression finale réduite</span>
+                La fonction est de la forme : \\( ${d.f}(${d.v}) = ${s3_f} \\)<br>
+                Donc sa dérivée est de la forme \\( ${d.notation}(${d.v}) = ${s3_d} \\)
+            </div>
+        `;
+        document.getElementById('solution-box').innerHTML = html;
+        MathJax.typesetPromise();
+    }
+
+    function toggleSolution() {
+        const box = document.getElementById('solution-box');
+        if (box.style.display === "none") {
+            buildSolution();
+            box.style.display = "block";
+        } else {
+            box.style.display = "none";
+        }
+    }
+
+    function openCopyright() { document.getElementById("copyModal").style.display = "block"; }
+    function closeCopyright() { document.getElementById("copyModal").style.display = "none"; }
+    window.onclick = function(event) { if (event.target == document.getElementById("copyModal")) closeCopyright(); }
+</script>
+
+</body>
+</html>
