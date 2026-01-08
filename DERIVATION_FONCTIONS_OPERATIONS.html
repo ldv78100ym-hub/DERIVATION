@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableaux des Dérivées et Opérations</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #2980b9;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 40px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f1f8ff;
+        }
+        
+        .formula-cell {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .params-cell {
+            color: #7f8c8d;
+        }
+        
+        .derivative-cell {
+            color: #27ae60;
+        }
+        
+        .final-cell {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .operation-title {
+            background-color: #9b59b6 !important;
+        }
+        
+        .note {
+            background-color: #fffde7;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #f1c40f;
+            margin-top: 20px;
+            font-size: 0.95em;
+        }
+        
+        .note h3 {
+            margin-top: 0;
+            color: #f39c12;
+        }
+        
+        .interactive-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            min-width: 220px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button#reset-btn {
+            background-color: #e74c3c;
+        }
+        
+        button#reset-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        button#random-btn {
+            background-color: #2ecc71;
+        }
+        
+        button#random-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 10px 5px;
+                font-size: 0.9em;
+            }
+            
+            .interactive-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Styles améliorés pour MathJax */
+        .MathJax, mjx-container, mjx-math {
+            font-size: 1.15em !important; 
+        }
+
+        .derivative-cell mjx-container {
+            padding: 2px 0;
+        }
+        
+        /* Personnalisation de la taille du symbole prime */
+        mjx-c.mjx-c2032 {
+            font-size: 1.5em !important;
+            vertical-align: -0.1em;
+            margin-right: 0.05em;
+        }
+	.btn-copyright {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-copyright:hover {
+            background-color: #34495e;
+        }
+
+        /* Styles pour le Popup (Modal) */
+        .modal {
+            display: none; /* Caché par défaut */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5); /* Fond sombre */
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 25px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close-btn:hover {
+            color: black;
+        }
+
+        .modal-h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tableaux des Dérivées et Opérations</h1>
+        
+        <div class="interactive-controls">
+            <button id="fill-btn">Remplir avec des exemples</button>
+            <button id="random-btn">Générer des valeurs aléatoires</button>
+            <button id="reset-btn">Effacer tous les exemples</button>
+        </div>
+        
+        <div class="table-container">
+            <h2>Tableau des fonctions de référence</h2>
+            <table id="reference-table">
+                <thead>
+                    <tr>
+                        <th>Formule pour \(f(x)\)</th>
+                        <th>Paramètres</th>
+                        <th>Formule pour \(f^{\prime}(x)\)</th>
+                        <th>Expression finale de \(f^{\prime}(x)\)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="formula-cell">\(k\)</td>
+                        <td class="params-cell" id="params-1">\(k = \cdots\)</td>
+                        <td class="derivative-cell">\(f^{\prime}(x) = 0\)</td>
+                        <td class="final-cell" id="final-1">\(f^{\prime}(x) = 0\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\(mx + p\)</td>
+                        <td class="params-cell" id="params-2">\(m = \cdots\)<br>\(p = \cdots\)</td>
+                        <td class="derivative-cell">\(f^{\prime}(x) = m\)</td>
+                        <td class="final-cell" id="final-2">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\(ax^2 + bx + c\)</td>
+                        <td class="params-cell" id="params-3">\(a = \cdots\)<br>\(b = \cdots\)<br>\(c = \cdots\)</td>
+                        <td class="derivative-cell">\(f^{\prime}(x) = 2ax + b\)</td>
+                        <td class="final-cell" id="final-3">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\(ax^3 + bx^2 + cx + d\)</td>
+                        <td class="params-cell" id="params-4">\(a = \cdots\)<br>\(b = \cdots\)<br>\(c = \cdots\)<br>\(d = \cdots\)</td>
+                        <td class="derivative-cell">\(f^{\prime}(x) = 3ax^2 + 2bx + c\)</td>
+                        <td class="final-cell" id="final-4">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\(x^n\)</td>
+                        <td class="params-cell" id="params-5">\(n = \cdots\)</td>
+                        <td class="derivative-cell">\(f^{\prime}(x) = nx^{n-1}\)</td>
+                        <td class="final-cell" id="final-5">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="table-container">
+            <h2>Opérations sur les fonctions dérivées</h2>
+            <table id="operations-table">
+                <thead>
+                    <tr>
+                        <th class="operation-title">Opération</th>
+                        <th class="operation-title">Paramètres</th>
+                        <th class="operation-title">Formule pour \(f^{\prime}\)</th>
+                        <th class="operation-title">Expression finale de \(f^{\prime}(x)\)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="formula-cell">\(u + v\)</td>
+                        <td class="params-cell" id="op-params-1">
+                            \(u(x) = \cdots \quad v(x) = \cdots\)<br>
+                            \(u^{\prime}(x) = \cdots \quad v^{\prime}(x) = \cdots\)
+                        </td>
+                        <td class="derivative-cell">\(f^{\prime} = u^{\prime} + v^{\prime}\)</td>
+                        <td class="final-cell" id="op-final-1">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\(u - v\)</td>
+                        <td class="params-cell" id="op-params-2">
+                            \(u(x) = \cdots \quad v(x) = \cdots\)<br>
+                            \(u^{\prime}(x) = \cdots \quad v^{\prime}(x) = \cdots\)
+                        </td>
+                        <td class="derivative-cell">\(f^{\prime} = u^{\prime} - v^{\prime}\)</td>
+                        <td class="final-cell" id="op-final-2">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\(k \times u\)</td>
+                        <td class="params-cell" id="op-params-3">
+                            \(u(x) = \cdots\)<br>
+                            \(u^{\prime}(x) = \cdots\)
+                        </td>
+                        <td class="derivative-cell">\(f^{\prime} = k \times u^{\prime}\)</td>
+                        <td class="final-cell" id="op-final-3">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\(u \times v\)</td>
+                        <td class="params-cell" id="op-params-4">
+                            \(u(x) = \cdots \quad v(x) = \cdots\)<br>
+                            \(u^{\prime}(x) = \cdots \quad v^{\prime}(x) = \cdots\)
+                        </td>
+                        <td class="derivative-cell">\(f^{\prime} = u^{\prime} \times v + v^{\prime} \times u\)</td>
+                        <td class="final-cell" id="op-final-4">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\(\dfrac{u}{v}\)</td>
+                        <td class="params-cell" id="op-params-5">
+                            \(u(x) = \cdots \quad v(x) = \cdots\)<br>
+                            \(u^{\prime}(x) = \cdots \quad v^{\prime}(x) = \cdots\)
+                        </td>
+                        <td class="derivative-cell">\(f^{\prime} = \dfrac{u^{\prime} \times v - v^{\prime} \times u}{v^2}\)</td>
+                        <td class="final-cell" id="op-final-5">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                    <tr>
+                        <td class="formula-cell">\((u)^n\)</td>
+                        <td class="params-cell" id="op-params-6">
+                            \(u(x) = \cdots\)<br>
+                            \(u^{\prime}(x) = \cdots\)
+                        </td>
+                        <td class="derivative-cell">\(f^{\prime} = n \times u^{\prime} \times u^{n-1}\)</td>
+                        <td class="final-cell" id="op-final-6">\(f^{\prime}(x) = \cdots\)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="note">
+            <h3>Comment utiliser ce tableau :</h3>
+            <p>1. Les formules de dérivation sont affichées dans la troisième colonne.</p>
+            <p>2. <strong>Bouton "Remplir avec des exemples"</strong> : utilise des valeurs fixes prédéfinies.</p>
+            <p>3. <strong>Bouton "Générer des valeurs aléatoires"</strong> : crée des exemples uniques à chaque clic.</p>
+            <p>4. L'expression finale est calculée en substituant les paramètres dans la formule de dérivation.</p>
+            <p>5. Utilisez le bouton "Effacer" pour réinitialiser tous les exemples.</p>
+        </div>
+        <button class="btn-copyright" id="openCopyright">Voir les Droits d'Auteur</button>
+
+    <div id="copyrightModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeCopyright">&times;</span>
+            <h2 class="modal-h2">⚖️ Droits d'Auteur et Licence d'Utilisation</h2>
+	    <div style="font-size=0.5em>
+            <p>Auteur : Yann Merdy (yann.merdy@gmail.com) - Janvier 2026</p>
+
+	    <p>Licence d'Utilisation Non Commerciale</p>
+
+<p>Ce code HTML/CSS/JavaScript ainsi que le contenu généré par l'application ("Cours et Exercices Dynamiques : Le Produit Scalaire") sont la propriété intellectuelle exclusive de l'auteur, Yann Merdy.</p>
+
+<p><strong>Conditions :</strong></p>
+<p><strong>Utilisation Privée et Éducative (Autorisée) : </strong> Vous êtes autorisé.e à utiliser, copier, modifier et distribuer ce code et son contenu <strong>uniquement</strong> à des fins <strong>personnelles, éducatives et non lucratives.</strong></p>
+<p><strong>Utilisation Commerciale (Interdite) : </strong> Toute utilisation, distribution, intégration ou reproduction du code ou du contenu (total ou partiel) à des fins <strong>commerciales, lucratives ou professionnelles</strong> est <strong>strictement interdite</strong> sans un accord écrit préalable et explicite de l'auteur.</p>
+<p><strong>Attribution : </strong> Toute reproduction ou modification doit conserver la mention de l'auteur originale (Yann Merdy) et la présente notice de droits d'auteur.
+Pour toute demande d'utilisation commerciale ou de licence spécifique, veuillez contacter l'auteur à l'adresse indiquée ci-dessus.</p>
+	</div>
+        </div>
+    </div>
+        <footer>
+            <p>Tableau de référence pour les dérivées - Conçu pour l'apprentissage des mathématiques</p>
+            <p>Les formules sont affichées avec MathJax et peuvent être copiées pour utilisation dans des documents LaTeX.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration de MathJax
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+
+        // Données d'exemple pour le tableau de référence
+        const referenceExamples = [
+            { params: "$k = 5$", final: "$f^{\\prime}(x) = 0$" },
+            { params: "$m = 3$<br>$p = -2$", final: "$f^{\\prime}(x) = 3$" },
+            { params: "$a = 2$<br>$b = -1$<br>$c = 4$", final: "$f^{\\prime}(x) = 4x - 1$" },
+            { params: "$a = 1$<br>$b = -2$<br>$c = 3$<br>$d = -4$", final: "$f^{\\prime}(x) = 3x^2 - 4x + 3$" },
+            { params: "$n = 4$", final: "$f^{\\prime}(x) = 4x^3$" }
+        ];
+
+        // Données d'exemple pour le tableau des opérations
+        const operationsExamples = [
+            { 
+                params: "$u(x) = x^2$ &nbsp; $v(x) = 3x$<br>$u^{\\prime}(x) = 2x$ &nbsp; $v^{\\prime}(x) = 3$", 
+                final: "$f^{\\prime}(x) = 2x + 3$" 
+            },
+            { 
+                params: "$u(x) = 5x^3$ &nbsp; $v(x) = x^2$<br>$u^{\\prime}(x) = 15x^2$ &nbsp; $v^{\\prime}(x) = 2x$", 
+                final: "$f^{\\prime}(x) = 15x^2 - 2x$" 
+            },
+            { 
+                params: "$u(x) = x^2 + 1$<br>$u^{\\prime}(x) = 2x$<br>$k=10$", 
+                final: "$f^{\\prime}(x) = 10x$" 
+            },
+            { 
+                params: "$u(x) = x$ &nbsp; $v(x) = x^2$<br>$u^{\\prime}(x) = 1$ &nbsp; $v^{\\prime}(x) = 2x$", 
+                final: "$f^{\\prime}(x) = x^2 + 2x \\cdot x = 3x^2$" 
+            },
+            { 
+                params: "$u(x) = x$ &nbsp; $v(x) = x+1$<br>$u^{\\prime}(x) = 1$ &nbsp; $v^{\\prime}(x) = 1$", 
+                final: "$f^{\\prime}(x) = \\dfrac{1 \\cdot (x+1) - 1 \\cdot x}{(x+1)^2} = \\dfrac{1}{(x+1)^2}$" 
+            },
+            { 
+                params: "$u(x) = 2x+1$<br>$u^{\\prime}(x) = 2$", 
+                final: "$f^{\\prime}(x) = 3 \\cdot 2 \\cdot (2x+1)^2 = 6(2x+1)^2$" 
+            }
+        ];
+
+        // Fonction pour générer un nombre aléatoire avec signe
+        function randomInt(min, max, allowZero = true) {
+            let num;
+            do {
+                num = Math.floor(Math.random() * (max - min + 1)) + min;
+            } while (!allowZero && num === 0);
+            return num;
+        }
+
+        /**
+         * Formate un nombre simple (constante).
+         * Ex: 5 -> "+ 5", -3 -> "- 3"
+         */
+        function fmt(n, addSign = false) { 
+            if (n === 0) return "";
+            if (n > 0) return addSign ? `+ ${n}` : `${n}`;
+            return `- ${Math.abs(n)}`;
+        }
+
+        /**
+         * Formate un coefficient devant une variable.
+         * Ex: 1x -> "+ x", -1x -> "- x", 3x -> "+ 3x"
+         * Attention: Retourne toujours un espace au début pour la concaténation.
+         */
+        function fmtCoeff(n, variable) {
+            if (n === 0) return "";
+            let sign = n > 0 ? "+" : "-";
+            let abs = Math.abs(n);
+            let valStr = abs === 1 ? "" : abs;
+            return ` ${sign} ${valStr}${variable}`;
+        }
+        
+        /**
+         * Nettoie une expression complète pour qu'elle ne commence pas par "+ " 
+         * et gère le cas où l'expression est vide (résultat 0).
+         */
+        function cleanExpr(expr) {
+            let cleaned = expr.trim();
+            // Enlever le "+" initial s'il existe (ex: "+ 3x" -> "3x")
+            if (cleaned.startsWith('+')) {
+                cleaned = cleaned.substring(1).trim();
+            }
+            // Si vide, c'est 0
+            return cleaned === "" ? "0" : cleaned;
+        }
+
+        // Fonction pour obtenir une expression aléatoire simple et sa dérivée
+        function getRandomFunction() {
+            const types = ['linear', 'monomial', 'quadratic'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let funcStr = "";
+            let derivStr = "";
+
+            switch(type) {
+                case 'linear': // mx + p
+                    const m = randomInt(-4, 4, false);
+                    const p = randomInt(-5, 5);
+                    
+                    funcStr = cleanExpr(fmtCoeff(m, "x") + fmt(p, true));
+                    derivStr = `${m}`;
+                    break;
+                    
+                case 'monomial': // kx^n
+                    const coeff = randomInt(-4, 4, false);
+                    const exp = randomInt(1, 4);
+                    const varPart = exp > 1 ? `x^${exp}` : `x`;
+                    
+                    funcStr = cleanExpr(fmtCoeff(coeff, varPart));
+                    
+                    // Calcul dérivée
+                    const newCoeff = coeff * exp;
+                    const newExp = exp - 1;
+                    if (newExp === 0) {
+                        derivStr = `${newCoeff}`;
+                    } else {
+                        const newVar = newExp > 1 ? `x^${newExp}` : `x`;
+                        derivStr = cleanExpr(fmtCoeff(newCoeff, newVar));
+                    }
+                    break;
+                    
+                case 'quadratic': // ax^2 + bx + c
+                    const a = randomInt(-3, 3, false);
+                    const b = randomInt(-4, 4);
+                    const c = randomInt(-5, 5);
+                    
+                    funcStr = cleanExpr(fmtCoeff(a, "x^2") + fmtCoeff(b, "x") + fmt(c, true));
+                    derivStr = cleanExpr(fmtCoeff(2*a, "x") + fmt(b, true));
+                    break;
+                    
+                default:
+                    funcStr = "x";
+                    derivStr = "1";
+            }
+            
+            return { func: funcStr, deriv: derivStr };
+        }
+
+        // Fonction pour générer des exemples aléatoires
+        function generateRandomExamples() {
+            // Tableau des fonctions de référence
+            const randomReference = [];
+            
+            // 1. Fonction constante k
+            const k = randomInt(-10, 10);
+            randomReference.push({ 
+                params: `$k = ${k}$`, 
+                final: "$f^{\\prime}(x) = 0$" 
+            });
+            
+            // 2. Fonction linéaire mx + p
+            const m = randomInt(-6, 6, false);
+            const p = randomInt(-8, 8);
+            randomReference.push({ 
+                params: `$m = ${m}$<br>$p = ${p}$`, 
+                final: `$f^{\\prime}(x) = ${m}$` 
+            });
+            
+            // 3. Fonction quadratique ax^2 + bx + c -> 2ax + b
+            const a1 = randomInt(-4, 4, false);
+            const b1 = randomInt(-5, 5);
+            const c1 = randomInt(-6, 6);
+            
+            // Construction de la dérivée : 2ax + b
+            let derivQuad = cleanExpr(fmtCoeff(2 * a1, "x") + fmt(b1, true));
+            
+            randomReference.push({ 
+                params: `$a = ${a1}$<br>$b = ${b1}$<br>$c = ${c1}$`, 
+                final: `$f^{\\prime}(x) = ${derivQuad}$` 
+            });
+            
+            // 4. Fonction cubique ax^3 + bx^2 + cx + d -> 3ax^2 + 2bx + c
+            const a2 = randomInt(-3, 3, false);
+            const b2 = randomInt(-4, 4);
+            const c2 = randomInt(-5, 5);
+            const d2 = randomInt(-6, 6);
+            
+            // Construction dérivée : 3ax^2 + 2bx + c
+            let term1 = fmtCoeff(3 * a2, "x^2");
+            let term2 = fmtCoeff(2 * b2, "x");
+            let term3 = fmt(c2, true);
+            let derivCub = cleanExpr(term1 + term2 + term3);
+
+            randomReference.push({ 
+                params: `$a = ${a2}$<br>$b = ${b2}$<br>$c = ${c2}$<br>$d = ${d2}$`, 
+                final: `$f^{\\prime}(x) = ${derivCub}$` 
+            });
+            
+            // 5. Fonction puissance x^n
+            const n = randomInt(2, 6);
+            randomReference.push({ 
+                params: `$n = ${n}$`, 
+                final: `$f^{\\prime}(x) = ${n}x^{${n-1}}$` 
+            });
+
+            // Tableau des opérations avec valeurs aléatoires
+            const randomOperations = [];
+            
+            // Générer des fonctions aléatoires uniques pour chaque opération
+            for (let i = 0; i < 6; i++) {
+                const u = getRandomFunction();
+                let v;
+                
+                // Pour les opérations qui nécessitent deux fonctions
+                if (i === 0 || i === 1 || i === 3 || i === 4) {
+                    do {
+                        v = getRandomFunction();
+                    } while (v.func === u.func);
+                }
+                
+                const kVal = randomInt(2, 5);
+                const nVal = randomInt(2, 4);
+                
+                switch(i) {
+                    case 0: // u + v
+                        // Pour l'addition, on concatène u' et v' mais attention au signe de v'
+                        // Si v' commence par un nombre positif (ex: "3"), il faut ajouter "+".
+                        // Si v' est négatif (ex: "-3"), c'est bon.
+                        let vDerivDisplay = v.deriv;
+                        if (!vDerivDisplay.startsWith('-') && vDerivDisplay !== "0") {
+                            vDerivDisplay = "+ " + vDerivDisplay;
+                        }
+                        if (vDerivDisplay === "0") vDerivDisplay = ""; // + 0 est inutile
+                        
+                        let sumFinal = u.deriv + " " + vDerivDisplay;
+                        // Nettoyage si v' était vide ou 0
+                        if (sumFinal.trim() === "") sumFinal = "0";
+
+                        randomOperations.push({
+                            params: `$u(x) = ${u.func}$ &nbsp; $v(x) = ${v.func}$<br>$u^{\\prime}(x) = ${u.deriv}$ &nbsp; $v^{\\prime}(x) = ${v.deriv}$`,
+                            final: `$f^{\\prime}(x) = ${sumFinal}$`
+                        });
+                        break;
+                    case 1: // u - v
+                        randomOperations.push({
+                            params: `$u(x) = ${u.func}$ &nbsp; $v(x) = ${v.func}$<br>$u^{\\prime}(x) = ${u.deriv}$ &nbsp; $v^{\\prime}(x) = ${v.deriv}$`,
+                            final: `$f^{\\prime}(x) = (${u.deriv}) - (${v.deriv})$`
+                        });
+                        break;
+                    case 2: // k × u
+                        randomOperations.push({
+                            params: `$u(x) = ${u.func}$<br>$u^{\\prime}(x) = ${u.deriv}$<br>$k = ${kVal}$`,
+                            final: `$f^{\\prime}(x) = ${kVal} \\times (${u.deriv})$`
+                        });
+                        break;
+                    case 3: // u × v
+                        randomOperations.push({
+                            params: `$u(x) = ${u.func}$ &nbsp; $v(x) = ${v.func}$<br>$u^{\\prime}(x) = ${u.deriv}$ &nbsp; $v^{\\prime}(x) = ${v.deriv}$`,
+                            final: `$f^{\\prime}(x) = (${u.deriv}) \\times (${v.func}) + (${v.deriv}) \\times (${u.func})$`
+                        });
+                        break;
+                    case 4: // u / v
+                        let vFunc = v.func;
+                        // Protection division par zéro simple
+                        if (["0", "1", "-1"].includes(vFunc)) {
+                            vFunc = "x^2 + 1"; 
+                            v.deriv = "2x";
+                        }
+                        randomOperations.push({
+                            params: `$u(x) = ${u.func}$ &nbsp; $v(x) = ${vFunc}$<br>$u^{\\prime}(x) = ${u.deriv}$ &nbsp; $v^{\\prime}(x) = ${v.deriv}$`,
+                            final: `$f^{\\prime}(x) = \\dfrac{(${u.deriv}) \\times (${vFunc}) - (${v.deriv}) \\times (${u.func})}{(${vFunc})^2}$`
+                        });
+                        break;
+                    case 5: // (u)^n
+                        randomOperations.push({
+                            params: `$u(x) = ${u.func}$<br>$u^{\\prime}(x) = ${u.deriv}$<br>$n = ${nVal}$`,
+                            final: `$f^{\\prime}(x) = ${nVal} \\times (${u.deriv}) \\times (${u.func})^{${nVal-1}}$`
+                        });
+                        break;
+                }
+            }
+
+            // Remplir le tableau des fonctions de référence
+            for (let i = 0; i < randomReference.length; i++) {
+                const paramElement = document.getElementById(`params-${i+1}`);
+                const finalElement = document.getElementById(`final-${i+1}`);
+                
+                if (paramElement && finalElement) {
+                    paramElement.innerHTML = randomReference[i].params;
+                    finalElement.innerHTML = randomReference[i].final;
+                }
+            }
+            
+            // Remplir le tableau des opérations
+            for (let i = 0; i < randomOperations.length; i++) {
+                const paramElement = document.getElementById(`op-params-${i+1}`);
+                const finalElement = document.getElementById(`op-final-${i+1}`);
+                
+                if (paramElement && finalElement) {
+                    paramElement.innerHTML = randomOperations[i].params;
+                    finalElement.innerHTML = randomOperations[i].final;
+                }
+            }
+            
+            // Re-process MathJax pour afficher les nouvelles formules
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+            
+                    }
+
+        // Fonction pour remplir les exemples fixes
+        function fillExamples() {
+            // Remplir le tableau des fonctions de référence
+            for (let i = 0; i < referenceExamples.length; i++) {
+                const paramElement = document.getElementById(`params-${i+1}`);
+                const finalElement = document.getElementById(`final-${i+1}`);
+                
+                if (paramElement && finalElement) {
+                    paramElement.innerHTML = referenceExamples[i].params;
+                    finalElement.innerHTML = referenceExamples[i].final;
+                }
+            }
+            
+            // Remplir le tableau des opérations
+            for (let i = 0; i < operationsExamples.length; i++) {
+                const paramElement = document.getElementById(`op-params-${i+1}`);
+                const finalElement = document.getElementById(`op-final-${i+1}`);
+                
+                if (paramElement && finalElement) {
+                    paramElement.innerHTML = operationsExamples[i].params;
+                    finalElement.innerHTML = operationsExamples[i].final;
+                }
+            }
+            
+            // Re-process MathJax
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+            
+                    }
+
+        // Fonction pour réinitialiser les exemples
+        function resetExamples() {
+            // Réinitialiser le tableau des fonctions de référence
+            for (let i = 1; i <= 5; i++) {
+                const paramElement = document.getElementById(`params-${i}`);
+                const finalElement = document.getElementById(`final-${i}`);
+                
+                if (paramElement && finalElement) {
+                    if (i === 1) {
+                        paramElement.innerHTML = "$k = \\cdots$";
+                        finalElement.innerHTML = "$f^{\\prime}(x) = 0$";
+                    } else if (i === 2) {
+                        paramElement.innerHTML = "$m = \\cdots$<br>$p = \\cdots$";
+                        finalElement.innerHTML = "$f^{\\prime}(x) = \\cdots$";
+                    } else if (i === 3) {
+                        paramElement.innerHTML = "$a = \\cdots$<br>$b = \\cdots$<br>$c = \\cdots$";
+                        finalElement.innerHTML = "$f^{\\prime}(x) = \\cdots$";
+                    } else if (i === 4) {
+                        paramElement.innerHTML = "$a = \\cdots$<br>$b = \\cdots$<br>$c = \\cdots$<br>$d = \\cdots$";
+                        finalElement.innerHTML = "$f^{\\prime}(x) = \\cdots$";
+                    } else if (i === 5) {
+                        paramElement.innerHTML = "$n = \\cdots$";
+                        finalElement.innerHTML = "$f^{\\prime}(x) = \\cdots$";
+                    }
+                }
+            }
+            
+            // Réinitialiser le tableau des opérations
+            for (let i = 1; i <= 6; i++) {
+                const paramElement = document.getElementById(`op-params-${i}`);
+                const finalElement = document.getElementById(`op-final-${i}`);
+                
+                if (paramElement && finalElement) {
+                    if (i === 1 || i === 2 || i === 4 || i === 5) {
+                        paramElement.innerHTML = "$u(x) = \\cdots \\quad v(x) = \\cdots$<br>$u^{\\prime}(x) = \\cdots \\quad v^{\\prime}(x) = \\cdots$";
+                    } else if (i === 3 || i === 6) {
+                        paramElement.innerHTML = "$u(x) = \\cdots$<br>$u^{\\prime}(x) = \\cdots$";
+                    }
+                    finalElement.innerHTML = "$f^{\\prime}(x) = \\cdots$";
+                }
+            }
+            
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+            
+            
+        }
+
+        // Initialisation des événements
+        document.addEventListener('DOMContentLoaded', function() {
+            const fillBtn = document.getElementById('fill-btn');
+            const randomBtn = document.getElementById('random-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            
+            if (fillBtn) fillBtn.addEventListener('click', fillExamples);
+            if (randomBtn) randomBtn.addEventListener('click', generateRandomExamples);
+            if (resetBtn) resetBtn.addEventListener('click', resetExamples);
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        });
+	
+	// Récupération des éléments
+        const modal = document.getElementById("copyrightModal");
+        const btn = document.getElementById("openCopyright");
+        const span = document.getElementById("closeCopyright");
+
+        // Ouvrir le modal au clic sur le bouton
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // Fermer le modal au clic sur la croix (x)
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Fermer le modal si l'utilisateur clique n'importe où en dehors du contenu
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Fermer avec la touche Échap
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                modal.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
