@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours de Dérivation - Niveau Première (Fractions Irréductibles)</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #1a237e;
+            --secondary: #3949ab;
+            --accent: #ff6f00;
+            --success: #2e7d32;
+            --bg: #f5f9ff;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body { background-color: var(--bg); color: #333; line-height: 1.6; padding: 20px; max-width: 1000px; margin: 0 auto; }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;
+        }
+        
+        h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        .subtitle { opacity: 0.9; font-size: 1rem; }
+        
+        .controls {
+            background: white; padding: 15px; border-radius: 10px; margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+        }
+        
+        button {
+            padding: 10px 18px; border: 2px solid var(--secondary); border-radius: 6px;
+            cursor: pointer; font-weight: 600; background: white; color: var(--secondary);
+            transition: 0.2s; font-size: 0.95rem;
+        }
+        
+        button:hover { background: #e8eaf6; transform: translateY(-1px); }
+        button.active { background: var(--secondary); color: white; }
+        button#resetBtn { border-color: var(--accent); color: var(--accent); }
+        button#resetBtn:hover { background: var(--accent); color: white; }
+        
+        .section {
+            background: white; padding: 25px; border-radius: 10px; margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .section-title {
+            color: var(--primary); font-size: 1.4rem; border-bottom: 2px solid #eee;
+            margin-bottom: 20px; padding-bottom: 8px;
+        }
+        
+        .function-display {
+            font-size: 1.4rem; text-align: center; padding: 20px;
+            background: #eef2ff; border-radius: 8px; margin-bottom: 20px;
+            border-left: 5px solid var(--secondary);
+        }
+        
+        .derivation-flow {
+            background: #fcfcfc; border: 1px solid #eee; padding: 20px;
+            border-radius: 8px; margin-top: 15px; border-left: 4px solid var(--success);
+            font-size: 1.05rem;
+        }
+        
+        .derivation-flow p { margin-bottom: 15px; }
+
+        .math-block {
+            text-align: center; margin: 15px 0; font-size: 1.2rem;
+        }
+
+        /* Style pour l'encadré de résultat */
+        .result-box {
+            border: 2px solid #1a237e;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .result-box::before {
+            content: "CONCLUSION";
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #1a237e;
+            color: white;
+            padding: 0 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        
+        .tikz-container {
+            display: flex; justify-content: center; margin: 25px 0; overflow-x: auto;
+        }
+        canvas { background: white; }
+        
+        .variations-text {
+            background: #fff8e1; padding: 15px; border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .variation-sentence { margin-bottom: 10px; display: flex; align-items: baseline; gap: 10px; }
+        .variation-sentence:last-child { margin-bottom: 0; }
+        .icon-up { color: var(--success); font-weight: bold; }
+        .icon-down { color: #d32f2f; font-weight: bold; }
+        
+        footer {
+            text-align: center; font-size: 0.85rem; color: #777; margin-top: 40px;
+            border-top: 1px solid #eee; padding-top: 20px;
+        }
+        
+        .steps-list { list-style-type: none; padding-left: 10px; }
+        .steps-list li { margin-bottom: 10px; padding-left: 15px; border-left: 2px solid #ddd; }
+
+        /* --- STYLE POPUP COPYRIGHT --- */
+        .copyright-btn {
+            background: transparent;
+            border: 1px solid #ccc;
+            color: #555;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .copyright-btn:hover {
+            background: #eee;
+            color: #333;
+        }
+
+        .modal {
+            display: none; /* Caché par défaut */
+            position: fixed; 
+            z-index: 2000; 
+            left: 0; top: 0;
+            width: 100%; height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; 
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 90%; 
+            max-width: 600px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {transform: translateY(-50px); opacity: 0;}
+            to {transform: translateY(0); opacity: 1;}
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 { font-size: 1.1rem; margin: 0; }
+
+        .close {
+            color: rgba(255,255,255,0.8);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .close:hover { color: white; }
+
+        .modal-body { padding: 25px; font-size: 0.95rem; color: #444; }
+        .modal-body strong { color: var(--primary); }
+        .modal-body .allow { color: var(--success); font-weight: bold; }
+        .modal-body .forbid { color: #d32f2f; font-weight: bold; }
+        .modal-footer {
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dérivation & Signes</h1>
+        <p class="subtitle">Entraînement Première (Fractions Irréductibles)</p>
+    </header>
+    
+    <div class="controls">
+        <button class="function-btn active" data-type="affine">Fonction Affine</button>
+        <button class="function-btn" data-type="quadratic">Fonction 2nd degré</button>
+        <button class="function-btn" data-type="cubic">Fonction 3ème degré</button>
+        <button id="resetBtn">Nouvel exercice</button>
+    </div>
+    
+    <div class="section">
+        <h2 class="section-title">1. Calcul de la dérivée</h2>
+        <div class="function-display" id="functionDisplay"></div>
+        
+        <div class="derivation-flow" id="derivationContent"></div>
+    </div>
+    
+    <div class="section">
+        <h2 class="section-title">2. Étude du signe de \(\dfrac{df}{dx}(x)\)</h2>
+        <div class="derivation-flow" id="signMethod" style="border-left-color: var(--secondary);"></div>
+        
+        <div class="tikz-container">
+            <canvas id="tikzCanvas"></canvas>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">3. Conséquences sur les variations de f</h2>
+        <div class="variations-text" id="variationsSentences"></div>
+    </div>
+    
+    <footer>
+        <p>Outil généré pour l'apprentissage du lien Dérivée / Variations.<br>Rendu mathématique exact (Fractions).</p>
+        <button id="copyrightBtn" class="copyright-btn">⚖️ Droits d'Auteur</button>
+    </footer>
+
+    <div id="copyrightModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚖️ Droits d'Auteur et Licence</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px;">
+                    <strong>Auteur :</strong> Yann Merdy (<a href="mailto:yann.merdy@gmail.com" style="color:var(--secondary)">yann.merdy@gmail.com</a>)<br>
+                    <strong>Date :</strong> Janvier 2026
+                </p>
+                
+                <h4 style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">Licence d'Utilisation Non Commerciale</h4>
+                
+                <p style="margin-bottom: 10px;">Ce code HTML/CSS/JavaScript ainsi que le contenu généré par l'application sont la propriété intellectuelle exclusive de l'auteur, Yann Merdy.</p>
+                
+                <ul style="padding-left: 20px; margin-bottom: 15px;">
+                    <li style="margin-bottom: 8px;">
+                        <span class="allow">✓ Utilisation Privée et Éducative (Autorisée) :</span><br>
+                        Vous êtes autorisé.e à utiliser, copier, modifier et distribuer ce code et son contenu uniquement à des fins personnelles, éducatives et non lucratives.
+                    </li>
+                    <li style="margin-bottom: 8px;">
+                        <span class="forbid">✕ Utilisation Commerciale (Interdite) :</span><br>
+                        Toute utilisation, distribution, intégration ou reproduction du code ou du contenu (total ou partiel) à des fins commerciales, lucratives ou professionnelles est strictement interdite sans un accord écrit préalable et explicite de l'auteur.
+                    </li>
+                </ul>
+                
+                <p><strong>Attribution :</strong> Toute reproduction ou modification doit conserver la mention de l'auteur originale (Yann Merdy) et la présente notice de droits d'auteur.</p>
+            </div>
+            <div class="modal-footer">
+                Pour toute demande d'utilisation commerciale ou de licence spécifique, veuillez contacter l'auteur.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- CONFIGURATION MATHJAX --- */
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+
+        /* --- MOTEUR DE FRACTIONS --- */
+        const gcd = (a, b) => b === 0 ? Math.abs(a) : gcd(b, a % b);
+
+        // Crée un objet fraction simplifié {n, d}
+        const toFrac = (n, d = 1) => {
+            if (d === 0) return { n: 0, d: 1 };
+            if (d < 0) { n = -n; d = -d; }
+            const divisor = gcd(n, d);
+            return { n: n / divisor, d: d / divisor };
+        };
+
+        // Formate une fraction en LaTeX
+        const texFrac = (n, d = 1) => {
+            const f = toFrac(n, d);
+            if (f.d === 1) return `${f.n}`;
+            // Gestion propre du signe moins devant la fraction
+            const sign = f.n < 0 ? "-" : "";
+            return `${sign}\\dfrac{${Math.abs(f.n)}}{${f.d}}`;
+        };
+        
+        // Formate une fraction pour l'affichage (ex: substitution)
+        const parFrac = (n, d = 1) => {
+            const f = toFrac(n, d);
+            let latex = f.d === 1 ? `${f.n}` : `\\dfrac{${f.n}}{${f.d}}`;
+            // Pas de signe moins devant la fraction pour le parenthésage, on veut voir le signe dans le numérateur si nécessaire pour la logique, 
+            // mais ici on veut surtout (valeur).
+            // Si c'est négatif, on met des parenthèses
+            if (f.n < 0) return `(${latex})`;
+            return latex;
+        };
+
+        // Formatage "+ frac" ou "- frac"
+        const fmtFracSigned = (n, d = 1) => {
+             const f = toFrac(n, d);
+             if (f.n === 0) return "";
+             const sign = f.n > 0 ? "+" : "-";
+             const val = f.d === 1 ? Math.abs(f.n) : `\\dfrac{${Math.abs(f.n)}}{${f.d}}`;
+             return `${sign} ${val}`;
+        };
+
+        /* --- ÉTAT GLOBAL --- */
+        let state = {
+            type: 'affine',
+            params: {}, 
+            roots: [] 
+        };
+
+        /* --- UTILITAIRES --- */
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const randNz = (min, max) => { let v=0; while(v===0) v=rand(min,max); return v; };
+        
+        // Formatage coefficients entiers simples
+        const fmt = (n, isFirst = false) => {
+            if (n === 0) return "";
+            let sign = n > 0 ? (isFirst ? "" : "+") : "-";
+            return `${sign} ${Math.abs(n)}`;
+        };
+        const fmtCoeff = (n, isFirst = false) => {
+            if (n === 0) return "";
+            let abs = Math.abs(n);
+            let sign = n > 0 ? (isFirst ? "" : "+") : "-";
+            let val = abs === 1 ? "" : abs; 
+            return `${sign} ${val}`;
+        };
+        const par = (n) => n < 0 ? `(${n})` : n;
+        const fmtSub = (n) => n >= 0 ? `+ ${n}` : `- ${Math.abs(n)}`;
+
+        /* --- GÉNÉRATEUR --- */
+        function generateParams() {
+            state.roots = [];
+            
+            if (state.type === 'affine') {
+                state.params = { m: randNz(-10, 10), p: rand(-10, 10) };
+            } 
+            else if (state.type === 'quadratic') {
+                let a = randNz(-5, 5); 
+                let root = rand(-8, 8);
+                let b = -2 * a * root;
+                state.params = { a: a, b: b, c: rand(-10, 10) };
+                state.roots = [root];
+            } 
+            else if (state.type === 'cubic') {
+                let k = randNz(-3, 3) * 3;
+                let x1 = rand(-6, 6);
+                let x2 = rand(-6, 6);
+                let a = k / 3;
+                let b = (-k * (x1 + x2)) / 2;
+                let c = k * x1 * x2;
+                
+                if (!Number.isInteger(b)) return generateParams();
+                
+                state.params = { a, b, c, d: rand(-10, 10) };
+                state.roots = [x1, x2].sort((u, v) => u - v);
+                if (x1 === x2) state.roots = [x1];
+            }
+        }
+
+        /* --- RENDU TEXTE & MATHS --- */
+        function updateText() {
+            const p = state.params;
+            let f_tex = "", method = "", variationsHTML = "";
+            let form_f = "", form_prime = "", sub_prime = "", final_prime = "", form_coeff = "";
+            let final_prime_clean = "";
+
+            if (state.type === 'affine') {
+                f_tex = `f(x) = ${fmtCoeff(p.m, true)}x ${fmt(p.p)}`;
+                
+                form_f = "mx + p";
+                form_prime = "m";
+                form_coeff = `<p>avec \\(\\quad m = ${p.m}\\quad\\)et\\(\\quad p=${p.p}\\)</p>`;
+                sub_prime = `${p.m}`; 
+                final_prime_clean = `${p.m}`;
+                final_prime = `\\text{Finalement : } \\dfrac{df}{dx}(x) = ${p.m}`;
+
+                let signText = p.m > 0 ? "positive" : "négative";
+                
+                method = `<p>$\\dfrac{df}{dx}(x) = ${final_prime_clean}$</p>`;
+                method += `<div class="result-box">`;
+                method += `$\\textbf{Finalement}\\; \\dfrac{df}{dx}(x)$ est <strong>${signText}</strong> sur $\\mathbb{R}$.`;
+                method += `</div>`;
+
+                let sens = p.m > 0 ? "croissante" : "décroissante";
+                let icon = p.m > 0 ? "↗" : "↘";
+                let color = p.m > 0 ? "icon-up" : "icon-down";
+                variationsHTML = `<div class="variation-sentence"><span class="${color}">${icon}</span> La dérivée est constante et de signe constant (${signText}), donc $f$ est strictement <strong>${sens}</strong> sur $\\mathbb{R}$.</div>`;
+            }
+
+            else if (state.type === 'quadratic') {
+                let term_bx = p.b !== 0 ? `${fmtCoeff(p.b)}x` : "";
+                f_tex = `f(x) = ${fmtCoeff(p.a, true)}x^2 ${term_bx} ${fmt(p.c)}`;
+                
+                form_f = "ax^2 + bx + c";
+                form_prime = "2ax + b";
+                form_coeff = `<p>avec \\(\\quad a = ${p.a}\\quad b=${p.b}\\quad\\)et\\(\\quad c=${p.c}\\)</p>`;
+                
+                sub_prime = `2 \\times (${p.a})x +(${p.b})`;
+                
+                let A = 2 * p.a;
+                let B = p.b;
+                final_prime_clean = `${fmtCoeff(A, true)}x${fmt(B)}`;
+                final_prime = `\\text{Finalement : } \\dfrac{df}{dx}(x) = ${final_prime_clean}`;
+
+                let root = state.roots[0];
+                let rootTeX = texFrac(-B, A); // Calcul en fraction au cas où
+                let stepSymbol = A > 0 ? "\\ge" : "\\le";
+                
+                method = `<p>$\\dfrac{df}{dx}(x) = ${final_prime_clean}$</p>`;
+                method += `<p>Résolvons $\\dfrac{df}{dx}(x) \\ge 0$ :</p>`;
+                method += `$$ ${A}x ${fmt(B)} \\ge 0 \\iff ${A}x \\ge ${-B} \\iff x ${stepSymbol} ${rootTeX} $$`;
+
+                let intervalPos, intervalNeg;
+                if (A > 0) {
+                     intervalPos = `[${rootTeX} ; +\\infty[`;
+                     intervalNeg = `]-\\infty ; ${rootTeX}]`;
+                } else {
+                     intervalPos = `]-\\infty ; ${rootTeX}]`;
+                     intervalNeg = `[${rootTeX} ; +\\infty[`;
+                }
+
+                method += `<div class="result-box">`;
+                method += `$\\textbf{Finalement}\\; \\dfrac{df}{dx}(x)$ est <strong>positive</strong> sur $${intervalPos}$ et <strong>négative</strong> sur $${intervalNeg}$.`;
+                method += `</div>`;
+
+                let sens1 = A > 0 ? "décroissante" : "croissante";
+                let sens2 = A > 0 ? "croissante" : "décroissante";
+                
+                variationsHTML += `<div class="variation-sentence">Sur $]-\\infty ; ${rootTeX}]$, $f$ est <strong>${sens1}</strong>.</div>`;
+                variationsHTML += `<div class="variation-sentence">Sur $[${rootTeX} ; +\\infty[$, $f$ est <strong>${sens2}</strong>.</div>`;
+            }
+
+            else if (state.type === 'cubic') {
+                let term_bx2 = p.b !== 0 ? `${fmtCoeff(p.b)}x^2` : "";
+                let term_cx = p.c !== 0 ? `${fmtCoeff(p.c)}x` : "";
+
+                f_tex = `f(x) = ${fmtCoeff(p.a, true)}x^3 ${term_bx2} ${term_cx} ${fmt(p.d)}`;
+                
+                form_f = "ax^3 + bx^2 + cx + d";
+                form_prime = "3ax^2 + 2bx + c";
+                form_coeff = `<p>avec \\(\\quad a = ${p.a}\\quad b=${p.b}\\quad c=${p.c}\\quad\\)et\\(\\quad d=${p.d}\\)</p>`;
+
+                sub_prime = `3 \\times (${p.a})x^2 + 2 \\times (${p.b})x + (${p.c})`;
+                
+                let A = 3 * p.a;
+                let B = 2 * p.b;
+                let C = p.c;
+                
+                let term_prime_x = B !== 0 ? `${fmtCoeff(B)}x` : "";
+                final_prime_clean = `${fmtCoeff(A, true)}x^2 ${term_prime_x} ${fmt(C)}`;
+                final_prime = `\\text{Finalement : } \\dfrac{df}{dx}(x) = ${final_prime_clean}`;
+
+                // --- GESTION DES FRACTIONS POUR CANONIQUE ---
+                // alpha = -B / 2A
+                let alphaN = -B;
+                let alphaD = 2 * A;
+                let alphaTeX = texFrac(alphaN, alphaD);
+                let alphaParTeX = parFrac(alphaN, alphaD);
+                
+                // beta = f'(alpha). On fait le calcul en fraction pure.
+                // alpha = n/d. Beta = A(n/d)^2 + B(n/d) + C
+                // Beta = (A*n^2 + B*n*d + C*d^2) / d^2
+                let fAlpha = toFrac(alphaN, alphaD); 
+                let an = fAlpha.n; 
+                let ad = fAlpha.d;
+                
+                let betaNum = A * an * an + B * an * ad + C * ad * ad;
+                let betaDenom = ad * ad;
+                let betaTeX = texFrac(betaNum, betaDenom);
+                let betaTeXSigned = fmtFracSigned(betaNum, betaDenom); // avec le signe + ou -
+                
+                // Pour l'affichage de la résolution finale
+                // (x - alpha)^2 = -beta / A
+                let rhsNum = -betaNum * 1; // -beta
+                let rhsDenom = betaDenom * A; // divisé par A
+                let rhsTeX = texFrac(rhsNum, rhsDenom);
+
+                let r1 = state.roots[0];
+                let r2 = state.roots.length > 1 ? state.roots[1] : r1;
+
+                method = `<p>$\\dfrac{df}{dx}(x) = ${final_prime_clean}$</p>`;
+                method += `<ul class="steps-list">`;
+                
+                method += `<li>On détermine $\\alpha$ et $\\beta$ (sommet de la parabole de la dérivée) : <br>`;
+                method += `$\\alpha = \\dfrac{-b}{2a} = \\dfrac{${-B}}{${2*A}} = ${alphaTeX}$ <br>`;
+                method += `$\\beta = f'(\\alpha) = f'(${alphaParTeX}) = ${betaTeX}$</li>`;
+                
+                method += `<li>On en déduit la forme canonique : <br>`;
+                method += `$${A}(x - ${alphaParTeX})^2 ${betaTeXSigned}$</li>`;
+                
+                method += `<li>On résout $${A}(x - ${alphaParTeX})^2 ${betaTeXSigned}=0$</span> :<br>`;
+                
+                // Vérification si beta est nul
+                if (betaNum === 0) {
+                     method += `$${A}(x - ${alphaParTeX})^2 = 0 \\iff x = ${alphaTeX}$ (Racine double)`;
+                } else {
+                     // Vérif signes impossibles
+                     let A_is_pos = A > 0;
+                     let Beta_is_pos = (betaNum * betaDenom) > 0;
+                     
+                     if ((A_is_pos && Beta_is_pos) || (!A_is_pos && !Beta_is_pos)) {
+                         method += "Impossible car le carré est positif et le reste est du même signe.";
+                     } else {
+                         method += `$${A}(x - ${alphaParTeX})^2 = ${texFrac(-betaNum, betaDenom)} \\iff (x - ${alphaParTeX})^2 = ${rhsTeX}$<br>`;
+                         method += `Donc $x - ${alphaParTeX} = \\sqrt{${rhsTeX}}$ ou $x - ${alphaParTeX} = -\\sqrt{${rhsTeX}}$<br>`;
+                         method += `Les racines sont $x_1 = ${r1}$ et $x_2 = ${r2}$`;
+                     }
+                }
+                method += `</li>`;
+                
+                method += `<li>On en déduit le signe de $\\dfrac{df}{dx}(x)$ (Signe de $a$ à l'extérieur des racines)</li>`;
+                method += `</ul>`;
+
+                let sOut = A > 0 ? "positive" : "négative";
+                let sIn = A > 0 ? "négative" : "positive";
+                
+                method += `<div class="result-box">`;
+                if(r1 === r2) {
+                    method += `$\\textbf{Finalement}\\; \\dfrac{df}{dx}(x)$ est <strong>${sOut}</strong> sur $\\mathbb{R}$ (s'annule en ${r1}).`;
+                } else {
+                    method += `$\\textbf{Finalement}\\; \\dfrac{df}{dx}(x)$ est <strong>${sOut}</strong> sur $]-\\infty;${r1}]$, $\\dfrac{df}{dx}(x)$ est <strong>${sIn}</strong> sur $[${r1};${r2}]$ et $\\dfrac{df}{dx}(x)$ est <strong>${sOut}</strong> sur $[${r2};+\\infty[$.`;
+                }
+                method += `</div>`;
+
+                let sensOut = A > 0 ? "croissante" : "décroissante";
+                let sensIn = A > 0 ? "décroissante" : "croissante";
+
+                if (r1 === r2) {
+                     variationsHTML = `<div class="variation-sentence">Pour tout $x$, $\\dfrac{df}{dx}(x)$ est du signe de $${A}$, donc $f$ est <strong>${sensOut}</strong> sur $\\mathbb{R}$.</div>`;
+                } else {
+                     variationsHTML += `<div class="variation-sentence">Sur $]-\\infty ; ${r1}]$, $f$ est <strong>${sensOut}</strong>.</div>`;
+                     variationsHTML += `<div class="variation-sentence">Sur $[${r1} ; ${r2}]$, $f$ est <strong>${sensIn}</strong>.</div>`;
+		     variationsHTML += `<div class="variation-sentence">Sur $[${r2} ; +\\infty[$, $f$ est <strong>${sensOut}</strong>.</div>`;
+
+                }
+            }
+
+            // Construction du HTML pour la partie 1
+            let derivationHTML = `
+                <p>\\(f(x)\\) est de la forme :</p>
+                <div class="math-block">$$${form_f}$$</div>
+                <div class="math-block">${form_coeff}</div>
+                <p>donc \\(\\dfrac{df}{dx}(x)\\) est de la forme :</p>
+                <div class="math-block">$$${form_prime}$$</div>
+                <p>c'est à dire : \\(\\dfrac{df}{dx}(x) = ${sub_prime}\\)</p>
+                <div class="result-box">
+                    \\(${final_prime}\\) 
+                </div>
+            `;
+
+            document.getElementById('functionDisplay').innerHTML = `$${f_tex}$`;
+            document.getElementById('derivationContent').innerHTML = derivationHTML;
+            document.getElementById('signMethod').innerHTML = method;
+            document.getElementById('variationsSentences').innerHTML = variationsHTML;
+            
+            MathJax.typesetPromise();
+            drawTikZTable();
+        }
+
+        /* --- DESSIN CANVAS (STYLE TIKZ) --- */
+        function drawTikZTable() {
+            const canvas = document.getElementById('tikzCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const width = 600;
+            const height = 120;
+            
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, width, height);
+            
+            ctx.font = "italic 18px 'Times New Roman', serif";
+            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = "#000";
+            ctx.fillStyle = "#000";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            ctx.beginPath();
+            ctx.moveTo(0, 40); ctx.lineTo(width, 40);
+            ctx.moveTo(80, 0); ctx.lineTo(80, height);
+            ctx.rect(0.5, 0.5, width-1, height-1); 
+            ctx.stroke();
+
+            ctx.fillText("x", 40, 20);
+            ctx.fillText("f '(x)", 40, 80);
+            ctx.fillText("-∞", 120, 20);
+            ctx.fillText("+∞", width - 40, 20);
+
+            const roots = state.roots;
+            const ySign = 80;
+            const drawArea = width - 80;
+            
+            let xPos = [];
+            if (roots.length === 1) xPos = [80 + drawArea/2];
+            else if (roots.length === 2) xPos = [80 + drawArea/3, 80 + 2*drawArea/3];
+
+            xPos.forEach((x, i) => {
+                let val = roots[i];
+                ctx.fillText(val, x, 20);
+                
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(x, 40);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                ctx.fillStyle = "white";
+                ctx.fillRect(x - 10, ySign - 10, 20, 20);
+                ctx.fillStyle = "black";
+                ctx.fillText("0", x, ySign);
+            });
+
+            let signs = [];
+            let leadCoeff = 0;
+            
+            if(state.type === 'affine') leadCoeff = state.params.m;
+            if(state.type === 'quadratic') leadCoeff = 2 * state.params.a;
+            if(state.type === 'cubic') leadCoeff = 3 * state.params.a;
+
+            if(state.type === 'affine') {
+                signs = [leadCoeff > 0 ? "+" : "-"];
+            } 
+            else if (state.type === 'quadratic') {
+                let sRight = leadCoeff > 0 ? "+" : "-";
+                let sLeft = leadCoeff > 0 ? "-" : "+";
+                signs = [sLeft, sRight];
+            }
+            else if (state.type === 'cubic') {
+                let sA = leadCoeff > 0 ? "+" : "-";
+                if(roots.length === 1) signs = [sA, sA];
+                else {
+                    let sOp = leadCoeff > 0 ? "-" : "+";
+                    signs = [sA, sOp, sA];
+                }
+            }
+
+            let boundaries = [80, ...xPos, width];
+            for(let i=0; i<boundaries.length-1; i++) {
+                let center = (boundaries[i] + boundaries[i+1]) / 2;
+                ctx.font = "bold 22px Arial";
+                ctx.fillText(signs[i], center, ySign);
+            }
+        }
+
+        document.querySelectorAll('.function-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.function-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.type = btn.dataset.type;
+                generateParams();
+                updateText();
+            });
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            generateParams();
+            updateText();
+        });
+        
+        /* --- GESTION DU POPUP COPYRIGHT --- */
+        const modal = document.getElementById("copyrightModal");
+        const btn = document.getElementById("copyrightBtn");
+        const span = document.getElementsByClassName("close")[0];
+
+        // Ouvrir le modal
+        btn.onclick = function() {
+          modal.style.display = "block";
+        }
+
+        // Fermer avec la croix
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+
+        // Fermer en cliquant en dehors
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
+
+        generateParams();
+        setTimeout(updateText, 100);
+
+    </script>
+</body>
+</html>
