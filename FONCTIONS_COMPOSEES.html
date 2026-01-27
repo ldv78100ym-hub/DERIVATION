@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dérivation des Fonctions Composées : h(x) = f(ax+b)</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']],
+                packages: ['base', 'ams', 'noerrors', 'noundefined']
+            },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --warning: #e67e22;
+            --success: #27ae60;
+            --light: #ecf0f1;
+            --bg: #fdfdfd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2, h3 { color: var(--primary); }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Course Section */
+        .course-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .formula {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+
+        /* Exercise Section */
+        .exercise-box {
+            border: 2px solid var(--primary);
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .step {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(52, 152, 219, 0.05);
+            border-radius: 6px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover { background-color: #1a252f; }
+        .btn-reset { background-color: var(--warning); }
+        .btn-reset:hover { background-color: #d35400; }
+        .btn-copyright { background-color: #95a5a6; font-size: 0.8em; margin-top: 20px;}
+
+        /* Canvas */
+        #signTableCanvas {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            display: block;
+            margin: 20px auto;
+            max-width: 1000px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Cours & Exercice : Dérivée de \( x \mapsto f(ax+b) \)</h1>
+    
+    <div class="course-box">
+        <h2>📘 Rappel de cours (Niveau Première)</h2>
+        <p>
+            Nous étudions une fonction \( h \) qui est une <strong>composée</strong>. 
+            Cela signifie qu'elle est fabriquée en enchaînant deux calculs : 
+            d'abord une fonction affine \( u(x) = ax+b \), puis une fonction \( f \).
+        </p>
+        <p>On note : \[ h(x) = f(ax+b) \]</p>
+        
+        <div class="formula">
+            <strong>La formule magique de la dérivée :</strong><br><br>
+            \[ h'(x) = a \times f'(ax+b) \]
+        </div>
+
+        <p><strong>Méthode pas à pas :</strong></p>
+        <ol>
+            <li>Identifier les nombres \( a \) et \( b \) dans l'expression \( ax+b \).</li>
+            <li>Calculer la dérivée de la fonction de référence \( f \), notée \( f'(X) \).</li>
+            <li>Remplacer \( X \) par \( (ax+b) \) dans le résultat.</li>
+            <li>Multiplier le tout par \( a \).</li>
+        </ol>
+    </div>
+
+    <div style="text-align: center;">
+        <button class="btn btn-reset" onclick="generateExercise()">🔄 Nouvel Exercice (Réinitialiser)</button>
+    </div>
+
+    <div class="exercise-box" id="exerciseArea">
+        </div>
+
+    <div id="canvasContainer" style="display:none; text-align:center;">
+        <h3>Tableau de signe de la dérivée \( h'(x) \)</h3>
+        <canvas id="signTableCanvas" width="600" height="200"></canvas>
+    </div>
+
+    <button class="btn btn-copyright" onclick="openModal()">⚖️ Droits d'Auteur</button>
+</div>
+
+<div id="copyrightModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>⚖️ Droits d'Auteur et Licence d'Utilisation</h2>
+        <p><strong>Auteur :</strong> Yann Merdy (yann.merdy@gmail.com) - Janvier 2026</p>
+        
+        <h3>Licence d'Utilisation Non Commerciale</h3>
+        <p>Ce code HTML/CSS/JavaScript ainsi que le contenu généré par l'application sont la propriété intellectuelle exclusive de l'auteur, Yann Merdy.</p>
+        
+        <p><strong>Conditions :</strong></p>
+        <ul>
+            <li><strong>Utilisation Privée et Éducative (Autorisée) :</strong> Vous êtes autorisé.e à utiliser, copier, modifier et distribuer ce code et son contenu uniquement à des fins personnelles, éducatives et non lucratives.</li>
+            <li><strong>Utilisation Commerciale (Interdite) :</strong> Toute utilisation, distribution, intégration ou reproduction du code ou du contenu (total ou partiel) à des fins commerciales, lucratives ou professionnelles est strictement interdite sans un accord écrit préalable et explicite de l'auteur.</li>
+        </ul>
+        
+        <p><strong>Attribution :</strong> Toute reproduction ou modification doit conserver la mention de l'auteur originale (Yann Merdy) et la présente notice de droits d'auteur.</p>
+    </div>
+</div>
+
+<script>
+/**
+ * UTILITAIRES MATHÉMATIQUES STRICTS
+ * NOTE IMPORTANTE : En JS, il faut utiliser \\ pour faire un seul \ en HTML.
+ * Exemple : pour afficher \( ... \), on écrit `\\( ... \\)` dans la chaîne JS.
+ * Pour afficher \[ ... \], on écrit `\\[ ... \\]`.
+ */
+
+// Générateur d'entiers aléatoires [min, max]
+function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Générateur d'entiers non nuls
+function randNonZero(min, max) {
+    let val = 0;
+    while (val === 0) val = rand(min, max);
+    return val;
+}
+
+// PGCD
+function gcd(a, b) {
+    return b === 0 ? a : gcd(b, a % b);
+}
+
+// Fractions
+function simplifyFrac(n, d) {
+    if (d === 0) return {n:0, d:1}; 
+    if (d < 0) { n = -n; d = -d; }
+    const div = gcd(Math.abs(n), d);
+    return { n: n/div, d: d/div };
+}
+
+// LaTeX Fraction : \dfrac{a}{b} -> JS: \\dfrac{a}{b}
+function texFrac(n, d) {
+    const f = simplifyFrac(n, d);
+    if (f.d === 1) return String(f.n);
+    if (f.n < 0) return `-\\dfrac{${Math.abs(f.n)}}{${f.d}}`;
+    return `\\dfrac{${f.n}}{${f.d}}`;
+}
+
+// LaTeX Affine : ax+b
+function texAffine(a, b, variable = "x") {
+    let res = "";
+    if (a === 1) res += variable;
+    else if (a === -1) res += "-" + variable;
+    else if (a !== 0) res += a + variable;
+    
+    if (b > 0) {
+        res += (a !== 0 ? "+" : "") + b;
+    } else if (b < 0) {
+        res += b;
+    } else {
+        if (a === 0) res += "0";
+    }
+    return res;
+}
+
+/**
+ * MOTEUR DE L'EXERCICE
+ */
+function generateExercise() {
+    const types = ['poly', 'inverse', 'rational'];
+    const type = types[rand(0, 2)];
+    const a = randNonZero(-10, 10);
+    const b = rand(-10, 10);
+    
+    let ex = {
+        type: type,
+        a: a,
+        b: b,
+        u_tex: texAffine(a, b, "x"),
+        signData: null
+    };
+
+    const container = document.getElementById('exerciseArea');
+    const canvasContainer = document.getElementById('canvasContainer');
+    canvasContainer.style.display = "none";
+    
+    let htmlContent = "";
+
+    // --- CAS 1 : POLYNOME ---
+    if (type === 'poly') {
+        const deg = rand(1, 3); 
+        const c3 = deg === 3 ? randNonZero(-3, 3) : 0;
+        const c2 = deg >= 2 ? (deg===2 ? randNonZero(-5, 5) : rand(-5, 5)) : 0;
+        const c1 = deg >= 1 ? (deg===1 ? randNonZero(-10, 10) : rand(-10, 10)) : 0;
+        const c0 = rand(-20, 20);
+
+        // Construction f(x)
+        let f_terms = [];
+        if (c3 !== 0) f_terms.push((c3==1?"":c3==-1?"-":c3) + "x^3");
+        if (c2 !== 0) f_terms.push((c2>0&&f_terms.length?"+":"") + (c2==1?"":c2==-1?"-":c2) + "x^2");
+        if (c1 !== 0) f_terms.push((c1>0&&f_terms.length?"+":"") + (c1==1?"":c1==-1?"-":c1) + "x");
+        if (c0 !== 0 || f_terms.length === 0) f_terms.push((c0>0&&f_terms.length?"+":"") + c0);
+        const f_tex = f_terms.join("");
+
+        let f_prime_tex = "";
+        let f_prime_val_tex = "";
+        
+        if (deg === 1) {
+            f_prime_tex = String(c1);
+            f_prime_val_tex = String(c1);
+        } else if (deg === 2) {
+            f_prime_tex = texAffine(2*c2, c1, "x");
+            // Pas de balises math ici, juste le texte LaTeX brut
+            f_prime_val_tex = `\\left( ${texAffine(2*c2, c1, "\\left(" + ex.u_tex + "\\right)")} \\right)`;
+        } else {
+            let a_prime = 3*c3;
+            let b_prime = 2*c2;
+            let c_prime = c1;
+            f_prime_tex = `${a_prime}x^2 ${b_prime>=0?"+":""}${b_prime}x ${c_prime>=0?"+":""}${c_prime}`;
+            f_prime_val_tex = `\\left[ ${a_prime}(${ex.u_tex})^2 ${b_prime>=0?"+":""}${b_prime}(${ex.u_tex}) ${c_prime>=0?"+":""}${c_prime} \\right]`;
+        }
+
+        htmlContent += `<h3>Cas : Fonction Polynomiale de degré ${deg}</h3>`;
+        htmlContent += `<p>Soit la fonction \\( f \\) définie par \\( f(x) = ${f_tex} \\).</p>`;
+        htmlContent += `<p>Soit la fonction \\( h \\) définie par \\( h(x) = f(${ex.u_tex}) \\).</p>`;
+        htmlContent += `<p class="step-title">Question : Déterminer \\( h'(x) \\) et son signe.</p>`;
+
+        htmlContent += `<div class="step"><span class="step-title">Étape 1 : Identifier la structure</span>`;
+        htmlContent += `<p>On reconnaît la forme \\( f(ax+b) \\) avec :</p>`;
+        htmlContent += `<ul><li>\\( a = ${a} \\)</li><li>\\( b = ${b} \\)</li><li>La fonction de référence est \\( f(x) = ${f_tex} \\)</li></ul></div>`;
+
+        htmlContent += `<div class="step"><span class="step-title">Étape 2 : Dériver la fonction de référence</span>`;
+        htmlContent += `<p>On calcule \\( f'(x) \\) pour tout réel \\( x \\) :</p>`;
+        htmlContent += `\\[ f'(x) = ${f_prime_tex} \\]</div>`;
+
+        htmlContent += `<div class="step"><span class="step-title">Étape 3 : Appliquer la formule</span>`;
+        htmlContent += `<p>La formule est \\( h'(x) = a \\times f'(${ex.u_tex}) \\).</p>`;
+        
+        // Calcul strict sans imbrication de balises
+        let result_string = "";
+        
+        if (deg === 1) {
+             result_string = `${a} \\times ${c1} = ${a*c1}`;
+             ex.signData = { type: 'constant', val: a*c1 };
+        } 
+        else if (deg === 2) {
+            let final_slope = a * (2*c2 * a); 
+            let final_const = a * (2*c2 * b + c1);
+            
+            // Partie calcul
+            let calc = `${a} \\times \\left( ${2*c2}(${ex.u_tex}) ${c1>=0?"+":""}${c1} \right)`;
+            // Partie résultat simplifié
+            let developed = texAffine(final_slope, final_const, "x");
+            
+            result_string = `${calc} = ${developed}`;
+            ex.signData = { type: 'affine', a: final_slope, b: final_const };
+        }
+        else {
+            let A = 3*c3; let B = 2*c2; let C = c1;
+            let tot_x2 = a * (A * a * a);
+            let tot_x = a * (A * 2 * a * b + B * a);
+            let tot_c = a * (A * b * b + B * b + C);
+            
+            // Pour le degré 3, on affiche juste la substitution puis le résultat développé si possible, ou on laisse factorisé
+            result_string = `${a} \\times ${f_prime_val_tex}`;
+            // On ajoute le résultat développé sur une ligne suivante pour éviter la surcharge
+            let developed = `${texAffine(tot_x2, 0, "x^2")} ${tot_x>=0?"+":""} ${texAffine(tot_x, tot_c, "x")}`;
+            result_string += ` = ${developed}`;
+
+            ex.signData = { type: 'quad', a: tot_x2, b: tot_x, c: tot_c };
+        }
+        
+        // On enveloppe le tout dans UNE SEULE paire de balises display math
+        htmlContent += `\\[ h'(x) = ${result_string} \\]</div>`;
+    }
+
+    // --- CAS 2 : FONCTION INVERSE ---
+    else if (type === 'inverse') {
+        const k = randNonZero(-10, 10);
+        
+        htmlContent += `<h3>Cas : Fonction Inverse</h3>`;
+        htmlContent += `<p>Soit \\( f(x) = \\dfrac{${k}}{x} \\).</p>`;
+        htmlContent += `<p>On considère \\( h(x) = f(${ex.u_tex}) = \\dfrac{${k}}{${ex.u_tex}} \\).</p>`;
+        
+        htmlContent += `<div class="step"><span class="step-title">Étape 1 : Identification</span>`;
+        htmlContent += `<ul><li>\\( a = ${a} \\)</li><li>\\( f(x) = \\dfrac{${k}}{x} \\)</li></ul></div>`;
+
+        htmlContent += `<div class="step"><span class="step-title">Étape 2 : Dérivée de f</span>`;
+        htmlContent += `<p>On sait que \\( \\left(\\dfrac{1}{x}\\right)' = -\\dfrac{1}{x^2} \\). Donc :</p>`;
+        htmlContent += `\\[ f'(x) = -\\dfrac{${k}}{x^2} \\]</div>`;
+
+        htmlContent += `<div class="step"><span class="step-title">Étape 3 : Conclusion</span>`;
+        htmlContent += `<p>\\( h'(x) = a \\times f'(${ex.u_tex}) \\)</p>`;
+        
+        let finalNum = a * -k;
+        // Construction de la chaîne LaTeX sans balises imbriquées
+        let line = `h'(x) = ${a} \\times \\left( -\\dfrac{${k}}{(${ex.u_tex})^2} \\right) = \\dfrac{${finalNum}}{(${ex.u_tex})^2}`;
+        
+        htmlContent += `\\[ ${line} \\]</div>`;
+        
+        ex.signData = { type: 'rational_sq', num: finalNum, root: simplifyFrac(-b, a) };
+    }
+
+    // --- CAS 3 : FONCTION RATIONNELLE ---
+    else if (type === 'rational') {
+        const c = randNonZero(-5, 5);
+        const d = rand(-5, 5);
+        
+        htmlContent += `<h3>Cas : Fonction Rationnelle</h3>`;
+        htmlContent += `<p>Soit \\( f(x) = \\dfrac{${texAffine(c, d, "x")}}{x} \\).</p>`;
+        htmlContent += `<p>On cherche la dérivée de \\( h(x) = f(${ex.u_tex}) = \\dfrac{${texAffine(c, d, "("+ex.u_tex+")")}}{${ex.u_tex}} \\).</p>`;
+        
+        htmlContent += `<div class="step"><span class="step-title">Étape 1 : Dérivée de f</span>`;
+        htmlContent += `<p>On pose \\( u(x) = ${texAffine(c, d)} \\) et \\( v(x) = x \\).</p>`;
+        htmlContent += `<p>\\( u' = ${c} \\), \\( v' = 1 \\).</p>`;
+        htmlContent += `<p>Formule quotient : \\( \\dfrac{u'v - uv'}{v^2} \\)</p>`;
+        
+        let num_f = -d;
+        htmlContent += `\\[ f'(x) = \\dfrac{${c}x - (${texAffine(c, d)})}{x^2} = \\dfrac{${num_f}}{x^2} \\]</div>`;
+
+        htmlContent += `<div class="step"><span class="step-title">Étape 2 : Dérivée composée</span>`;
+        htmlContent += `<p>\\( h'(x) = a \\times f'(${ex.u_tex}) \\)</p>`;
+        
+        let finalNum = a * num_f;
+        // Construction unique
+        let line = `h'(x) = ${a} \\times \\dfrac{${num_f}}{(${ex.u_tex})^2} = \\dfrac{${finalNum}}{(${ex.u_tex})^2}`;
+        
+        htmlContent += `\\[ ${line} \\]</div>`;
+        
+        ex.signData = { type: 'rational_sq', num: finalNum, root: simplifyFrac(-b, a) };
+    }
+
+    container.innerHTML = htmlContent;
+    
+    // Rendu MathJax
+    if (window.MathJax) {
+        window.MathJax.typesetPromise();
+    }
+    
+    // Génération du tableau de signe
+    if (ex.signData) {
+        drawSignTable(ex.signData);
+        canvasContainer.style.display = "block";
+    }
+}
+
+/**
+ * MOTEUR GRAPHIQUE CANVAS (Dessin du tableau de variation)
+ */
+function drawSignTable(data) {
+    const cvs = document.getElementById('signTableCanvas');
+    const ctx = cvs.getContext('2d');
+    const W = cvs.width;
+    const H = cvs.height;
+
+    // Reset complet
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "white";
+    ctx.fillRect(0,0,W,H);
+    
+    // Styles
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1.5;
+    ctx.font = "18px 'Times New Roman', serif";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Structure de base (Tableau)
+    ctx.beginPath();
+    ctx.moveTo(100, 10);
+    ctx.lineTo(100, H-10);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(10, 60);
+    ctx.lineTo(W-10, 60);
+    ctx.stroke();
+
+    // Headers
+    ctx.fillText("x", 50, 35);
+    ctx.fillText("Signe", 50, 90);
+    ctx.fillText("de h'(x)", 50, 115);
+
+    // Bornes
+    ctx.fillText("-∞", 140, 35);
+    ctx.fillText("+∞", W-40, 35);
+
+    function drawSign(x, sign) {
+        ctx.font = "24px sans-serif";
+        if (sign > 0) ctx.fillText("+", x, 100);
+        else if (sign < 0) ctx.fillText("-", x, 100);
+        else ctx.fillText("0", x, 100);
+        ctx.font = "18px 'Times New Roman', serif";
+    }
+
+    function drawZeroBar(x) {
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(x, 60);
+        ctx.lineTo(x, H-10);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.clearRect(x-10, 90, 20, 20); 
+        ctx.fillText("0", x, 100);
+    }
+
+    function drawDoubleBar(x) {
+        ctx.beginPath();
+        ctx.moveTo(x-3, 60);
+        ctx.lineTo(x-3, H-10);
+        ctx.moveTo(x+3, 60);
+        ctx.lineTo(x+3, H-10);
+        ctx.stroke();
+    }
+    
+    function drawVal(txt, x) {
+        ctx.fillText(txt, x, 35);
+    }
+
+    if (data.type === 'constant') {
+        drawSign((140 + W-40)/2, data.val);
+    }
+
+    else if (data.type === 'affine') {
+        if (data.a === 0) { 
+             drawSign((140 + W-40)/2, data.b);
+        } else {
+            let f = simplifyFrac(-data.b, data.a);
+            let displayRoot = f.d === 1 ? f.n : f.n + "/" + f.d;
+            
+            let cx = (140 + W-40)/2;
+            drawVal(displayRoot, cx);
+            drawZeroBar(cx);
+            
+            let signLeft = data.a > 0 ? -1 : 1;
+            drawSign((140 + cx)/2, signLeft);
+            drawSign((cx + W-40)/2, -signLeft);
+        }
+    }
+
+    else if (data.type === 'rational_sq') {
+        let cx = (140 + W-40)/2;
+        let f = data.root;
+        let displayRoot = f.d === 1 ? f.n : f.n + "/" + f.d;
+        
+        drawVal(displayRoot, cx);
+        drawDoubleBar(cx); 
+
+        let s = data.num > 0 ? 1 : -1;
+        drawSign((140 + cx)/2, s);
+        drawSign((cx + W-40)/2, s);
+    }
+
+    else if (data.type === 'quad') {
+        let delta = data.b*data.b - 4*data.a*data.c;
+        
+        if (delta < 0) {
+            drawSign((140 + W-40)/2, data.a);
+        } else if (delta === 0) {
+            let root = -data.b / (2*data.a);
+            let cx = (140 + W-40)/2;
+            drawVal(root.toFixed(1).replace('.0',''), cx);
+            drawZeroBar(cx);
+            let s = data.a > 0 ? 1 : -1;
+            drawSign((140 + cx)/2, s);
+            drawSign((cx + W-40)/2, s);
+        } else {
+            let x1 = (-data.b - Math.sqrt(delta)) / (2*data.a);
+            let x2 = (-data.b + Math.sqrt(delta)) / (2*data.a);
+            if (x1 > x2) [x1, x2] = [x2, x1];
+
+            let cx1 = 140 + (W-180)*0.33;
+            let cx2 = 140 + (W-180)*0.66;
+
+            drawVal(x1.toFixed(1).replace('.0',''), cx1);
+            drawZeroBar(cx1);
+            
+            drawVal(x2.toFixed(1).replace('.0',''), cx2);
+            drawZeroBar(cx2);
+
+            let sOut = data.a > 0 ? 1 : -1;
+            drawSign((140 + cx1)/2, sOut);
+            drawSign((cx1 + cx2)/2, -sOut);
+            drawSign((cx2 + W-40)/2, sOut);
+        }
+    }
+}
+
+// Modal Logic
+function openModal() { document.getElementById('copyrightModal').style.display = "block"; }
+function closeModal() { document.getElementById('copyrightModal').style.display = "none"; }
+window.onclick = function(event) {
+    if (event.target == document.getElementById('copyrightModal')) {
+        closeModal();
+    }
+}
+
+// Init
+window.onload = generateExercise;
+
+</script>
+
+</body>
+</html>
