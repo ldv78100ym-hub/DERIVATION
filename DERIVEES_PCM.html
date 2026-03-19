@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dérivation Assistée - Rigueur et Design</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']],
+                macros: {
+                    cu: ["{\\color{blue}{#1}}", 1],
+                    cpu: ["{\\color{red}{#1}}", 1],
+                    cv: ["{\\color{green}{#1}}", 1],
+                    cpv: ["{\\color{orange}{#1}}", 1],
+                    ckn: ["{\\color{purple}{#1}}", 1]
+                }
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --u-color: #0056b3;
+            --up-color: #d9534f;
+            --v-color: #198754;
+            --vp-color: #fd7e14;
+            --kn-color: #6f42c1;
+            --dark: #2c3e50;
+        }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #f8f9fa; margin-bottom: 80px; }
+        .container { max-width: 1100px; margin: auto; }
+        .header-box {
+            background: white; padding: 20px; border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; text-align: center;
+        }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; background: white; }
+        
+        td:nth-child(1) { width: 16.66%; }
+        td:nth-child(2) { width: 33.34%; }
+        td:nth-child(3) { width: 25%; }
+        td:nth-child(4) { width: 25%; }
+
+        td { border: 1px solid #333; height: 3cm; padding: 10px; text-align: center; vertical-align: middle; position: relative; }
+        .label { font-weight: bold; background-color: #f1f3f5; font-size: 0.9em; }
+        
+        /* Style de la croix pour les cellules vides */
+        .cross-cell {
+            background: 
+                linear-gradient(to top stroke, transparent 49.5%, #ccc 49.5%, #ccc 50.5%, transparent 50.5%),
+                linear-gradient(to top right, transparent 49.5%, #ccc 49.5%, #ccc 50.5%, transparent 50.5%),
+                linear-gradient(to bottom right, transparent 49.5%, #ccc 49.5%, #ccc 50.5%, transparent 50.5%);
+            background-repeat: no-repeat;
+        }
+        /* Alternative plus propre avec pseudo-éléments */
+        .no-data::before, .no-data::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-top: 1px solid #ddd; transform-origin: center; z-index: 0;
+        }
+        .no-data::before { transform: rotate(0deg); background: linear-gradient(to top right, transparent 49.8%, #bdc3c7 49.8%, #bdc3c7 50.2%, transparent 50.2%); }
+        .no-data::after { background: linear-gradient(to bottom right, transparent 49.8%, #bdc3c7 49.8%, #bdc3c7 50.2%, transparent 50.2%); }
+
+        .u-txt { color: var(--u-color); }
+        .up-txt { color: var(--up-color); }
+        .v-txt { color: var(--v-color); }
+        .vp-txt { color: var(--vp-color); }
+        .kn-txt { color: var(--kn-color); }
+
+        .btn-gen {
+            padding: 12px 25px; background: var(--dark); color: white; border: none;
+            border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-weight: bold;
+        }
+        
+        .result-area {
+            margin-top: 30px; padding: 25px; background: white;
+            border-left: 10px solid var(--dark); border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .copyright-btn {
+            position: fixed; bottom: 20px; right: 20px;
+            background: rgba(44, 62, 80, 0.8); color: white; border: none;
+            padding: 8px 15px; border-radius: 20px; cursor: pointer;
+            font-size: 0.85em; z-index: 10;
+        }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 10px; max-width: 600px;
+            max-height: 80vh; overflow-y: auto; position: relative; line-height: 1.5;
+        }
+        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 1.5em; cursor: pointer; color: #999; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h2>Calculer la dérivée de la fonction :</h2>
+        <div id="display-f" style="font-size: 1.8em; margin-top:10px;"></div>
+    </div>
+
+    <center><button class="btn-gen" onclick="generate()">Générer un nouvel exercice</button></center>
+
+    <table>
+        <tr>
+            <td class="label">Forme de la fonction</td>
+            <td id="f-shape" colspan="3" style="font-size: 1.3em;"></td>
+        </tr>
+        <tr>
+            <td class="label">Forme de la dérivée</td>
+            <td id="d-shape" colspan="3" style="font-size: 1.3em;"></td>
+        </tr>
+        <tr>
+            <td class="label u-txt">Expression de \(u(x)\)</td>
+            <td id="u-exp"></td>
+            <td class="label up-txt">Expression de \(u'(x)\)</td>
+            <td id="u-d-exp"></td>
+        </tr>
+        <tr>
+            <td class="label u-txt">Forme de \(u(x)\)</td>
+            <td id="u-form"></td>
+            <td class="label up-txt">Forme de \(u'(x)\)</td>
+            <td id="u-d-form"></td>
+        </tr>
+        <tr>
+            <td class="label v-txt">Expression de \(v(x)\)</td>
+            <td id="v-exp"></td>
+            <td class="label vp-txt">Expression de \(v'(x)\)</td>
+            <td id="v-d-exp"></td>
+        </tr>
+        <tr>
+            <td class="label v-txt">Forme de \(v(x)\)</td>
+            <td id="v-form"></td>
+            <td class="label vp-txt">Forme de \(v'(x)\)</td>
+            <td id="v-d-form"></td>
+        </tr>
+        <tr>
+            <td class="label kn-txt">Valeur de \(k\)</td>
+            <td id="k-val"></td>
+            <td class="label kn-txt">Valeur de \(n\)</td>
+            <td id="n-val"></td>
+        </tr>
+    </table>
+
+    <div class="result-area">
+        <h3 style="margin-top:0; color: var(--dark);">Solution (Expression brute) :</h3>
+        <div id="final-raw" style="font-size: 1.6em; text-align: center; padding: 15px;"></div>
+    </div>
+</div>
+
+<button class="copyright-btn" onclick="toggleModal(true)">© Droits d'Auteur</button>
+
+<div class="modal-overlay" id="copyrightModal" onclick="toggleModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="toggleModal(false)">&times;</span>
+        <h3>⚖️ Droits d'Auteur et Licence d'Utilisation</h3>
+        <p><strong>Auteur :</strong> Yann Merdy (yann.merdy@gmail.com) - Novembre 2025</p>
+        <p>Ce code et son contenu sont la propriété intellectuelle exclusive de l'auteur.</p>
+    </div>
+</div>
+
+<script>
+    function toggleModal(show) { document.getElementById('copyrightModal').style.display = show ? 'flex' : 'none'; }
+
+    function getRand() {
+        let n = 0; while ([0, 1, -1].includes(n)) n = Math.floor(Math.random() * 13) - 6; return n;
+    }
+
+    function parenthesize(val, macro) {
+        let cleanVal = val.toString().trim();
+        return cleanVal.startsWith('-') ? `(${macro}{${cleanVal}})` : `${macro}{${cleanVal}}`;
+    }
+
+    function setContent(id, content, isVoid = false) {
+        const el = document.getElementById(id);
+        if (isVoid) {
+            el.innerHTML = "";
+            el.classList.add('no-data');
+        } else {
+            el.innerHTML = content;
+            el.classList.remove('no-data');
+        }
+    }
+
+    function clean(str) {
+        return str.replace(/\+\s*-/g, "- ").replace(/-\s*-/g, "+ ").replace(/\+\+/g, "+").replace(/\+\-/g, "-").replace(/\-\+/g, "-").replace(/\-\-/g, "+").replace(/\b1x/g, "x").trim();
+    }
+
+    function fmt(val, first = false) {
+        if (val > 0) return first ? `${val}` : `+${val}`;
+        return `-${Math.abs(val)}`;
+    }
+
+    function generatePoly() {
+        const a = getRand(), b = getRand(), c = getRand(), d = getRand();
+        const types = [
+            { f: `ax+b`, e: `${a}x ${fmt(b)}`, df: `a`, de: `${a}` },
+            { f: `ax^2+bx+c`, e: `${a}x^2 ${fmt(b)}x ${fmt(c)}`, df: `2ax+b`, de: `${2*a}x ${fmt(b)}` },
+            { f: `ax^3+bx^2+cx+d`, e: `${a}x^3 ${fmt(b)}x^2 ${fmt(c)}x ${fmt(d)}`, df: `3ax^2+2bx+c`, de: `${3*a}x^2 ${fmt(2*b)}x ${fmt(c)}` }
+        ];
+        return types[Math.floor(Math.random() * types.length)];
+    }
+
+    function generate() {
+        const u = generatePoly();
+        const v = generatePoly();
+        const k = getRand();
+        const n = Math.floor(Math.random() * 3) + 2;
+
+        const pu = `(\\cu{${u.e}})`;
+        const pdu = parenthesize(u.de, '\\cpu');
+        const pv = `(\\cv{${v.e}})`;
+        const pdv = parenthesize(v.de, '\\cpv');
+        const pk = parenthesize(k, '\\ckn');
+
+        const cases = [
+            { s: `u+v`, ds: `u'+v'`, tex: `(\\cu{${u.e}}) + (\\cv{${v.e}})`, raw: `${pdu} + ${pdv}`, hasV: true },
+            { s: `u-v`, ds: `u'-v'`, tex: `(\\cu{${u.e}}) - (\\cv{${v.e}})`, raw: `${pdu} - ${pdv}`, hasV: true },
+            { s: `u \\times v`, ds: `u' \\times v + v' \\times u`, tex: `(\\cu{${u.e}}) \\times (\\cv{${v.e}})`, raw: `${pdu} \\times ${pv} + ${pdv} \\times ${pu}`, hasV: true },
+            { s: `\\dfrac{u}{v}`, ds: `\\dfrac{u'v-v'u}{v^2}`, tex: `\\dfrac{\\cu{${u.e}}}{\\cv{${v.e}}}`, raw: `\\dfrac{${pdu} \\times ${pv} - ${pdv} \\times ${pu}}{${pv}^2}`, hasV: true },
+            { s: `\\sqrt{u}`, ds: `\\dfrac{u'}{2\\sqrt{u}}`, tex: `\\sqrt{\\cu{${u.e}}}`, raw: `\\dfrac{${pdu}}{2\\sqrt{\\cu{${u.e}}}}`, hasV: false },
+            { s: `k \\times u`, ds: `k \\cdot u'`, tex: `\\ckn{${k}} \\times (\\cu{${u.e}})`, raw: `${pk} \\times ${pdu}`, hasV: false, isK: true },
+            { s: `u^n`, ds: `n \\times u' \\times u^{n-1}`, tex: `(\\cu{${u.e}})^{\\ckn{${n}}}`, raw: `\\ckn{${n}} \\times ${pdu} \\times (\\cu{${u.e}})^{\\ckn{${n-1}}}`, hasV: false, isN: true }
+        ];
+
+        const c = cases[Math.floor(Math.random() * cases.length)];
+
+        document.getElementById('display-f').innerHTML = `\\( f(x) = ${clean(c.tex)} \\)`;
+        document.getElementById('f-shape').innerHTML = `\\(${c.s}\\)`;
+        document.getElementById('d-shape').innerHTML = `\\(${c.ds}\\)`;
+
+        setContent('u-exp', `\\(\\cu{${clean(u.e)}}\\)`);
+        setContent('u-d-exp', `\\(\\cpu{${clean(u.de)}}\\)`);
+        setContent('u-form', `\\(\\cu{${u.f}}\\)`);
+        setContent('u-d-form', `\\(\\cpu{${u.df}}\\)`);
+
+        setContent('v-exp', `\\(\\cv{${clean(v.e)}}\\)`, !c.hasV);
+        setContent('v-d-exp', `\\(\\cpv{${clean(v.de)}}\\)`, !c.hasV);
+        setContent('v-form', `\\(\\cv{${v.f}}\\)`, !c.hasV);
+        setContent('v-d-form', `\\(\\cpv{${v.df}}\\)`, !c.hasV);
+
+        setContent('k-val', `\\(\\ckn{${k}}\\)`, !c.isK);
+        setContent('n-val', `\\(\\ckn{${n}}\\)`, !c.isN);
+
+        document.getElementById('final-raw').innerHTML = `\\( f'(x) = ${clean(c.raw)} \\)`;
+
+        MathJax.typesetPromise();
+    }
+    window.onload = generate;
+</script>
+</body>
+</html>
