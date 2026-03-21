@@ -164,7 +164,7 @@
 </div>
 
 <script>
-    let solutionData = {}; // Objet global pour stocker les données de la solution
+    let solutionData = {}; 
 
     function toggleModal(show) { document.getElementById('copyrightModal').style.display = show ? 'flex' : 'none'; }
 
@@ -200,9 +200,9 @@
     function generatePoly() {
         const a = getRand(), b = getRand(), c = getRand(), d = getRand();
         const types = [
-            { f: `ax+b`, e: `${a}x ${fmt(b)}`, df: `a`, de: `${a}` },
-            { f: `ax^2+bx+c`, e: `${a}x^2 ${fmt(b)}x ${fmt(c)}`, df: `2ax+b`, de: `${2*a}x ${fmt(b)}` },
-            { f: `ax^3+bx^2+cx+d`, e: `${a}x^3 ${fmt(b)}x^2 ${fmt(c)}x ${fmt(d)}`, df: `3ax^2+2bx+c`, de: `${3*a}x^2 ${fmt(2*b)}x ${fmt(c)}` }
+            { f: `ax+b`, params: `a=${a},\\, b=${b}`, e: `${a}x ${fmt(b)}`, df: `a`, de: `${a}` },
+            { f: `ax^2+bx+c`, params: `a=${a},\\, b=${b},\\, c=${c}`, e: `${a}x^2 ${fmt(b)}x ${fmt(c)}`, df: `2ax+b`, de: `${2*a}x ${fmt(b)}` },
+            { f: `ax^3+bx^2+cx+d`, params: `a=${a},\\, b=${b},\\, c=${c},\\, d=${d}`, e: `${a}x^3 ${fmt(b)}x^2 ${fmt(c)}x ${fmt(d)}`, df: `3ax^2+2bx+c`, de: `${3*a}x^2 ${fmt(2*b)}x ${fmt(c)}` }
         ];
         return types[Math.floor(Math.random() * types.length)];
     }
@@ -232,20 +232,18 @@
 
         const c = cases[Math.floor(Math.random() * cases.length)];
 
-        // Afficher la fonction à dériver
         document.getElementById('display-f').innerHTML = `\\( f(x) = ${clean(c.tex)} \\)`;
 
-        // Stocker la solution en mémoire
         solutionData = {
             fShape: `\\(${c.s}\\)`,
             dShape: `\\(${c.ds}\\)`,
             uExp: `\\(\\cu{${clean(u.e)}}\\)`,
             uDExp: `\\(\\cpu{${clean(u.de)}}\\)`,
-            uForm: `\\(\\cu{${u.f}}\\)`,
+            uForm: `\\(\\cu{${u.f}}\\)<br><div style="font-size: 0.85em; margin-top: 8px; opacity: 0.8;">\\(\\cu{(${u.params})}\\)</div>`,
             uDForm: `\\(\\cpu{${u.df}}\\)`,
             vExp: `\\(\\cv{${clean(v.e)}}\\)`,
             vDExp: `\\(\\cpv{${clean(v.de)}}\\)`,
-            vForm: `\\(\\cv{${v.f}}\\)`,
+            vForm: `\\(\\cv{${v.f}}\\)<br><div style="font-size: 0.85em; margin-top: 8px; opacity: 0.8;">\\(\\cv{(${v.params})}\\)</div>`,
             vDForm: `\\(\\cpv{${v.df}}\\)`,
             kVal: `\\(\\ckn{${k}}\\)`,
             nVal: `\\(\\ckn{${n}}\\)`,
@@ -255,13 +253,8 @@
             isN: c.isN
         };
 
-        // Vider le tableau et masquer la solution précédente
         clearTable();
-
-        // Réactiver le bouton Solution
         document.getElementById('btn-solution').style.display = 'inline-block';
-
-        // Effectuer le rendu LaTeX pour la fonction générée
         MathJax.typesetPromise();
     }
 
@@ -272,7 +265,7 @@
     }
 
     function showSolution() {
-        if (!solutionData.fShape) return; // Sécurité si cliqué avant génération
+        if (!solutionData.fShape) return;
 
         setContent('f-shape', solutionData.fShape);
         setContent('d-shape', solutionData.dShape);
@@ -290,11 +283,8 @@
         setContent('n-val', solutionData.nVal, !solutionData.isN);
 
         document.getElementById('final-raw').innerHTML = solutionData.rawFinal;
-
-        // Cacher le bouton Solution une fois cliqué (optionnel)
         document.getElementById('btn-solution').style.display = 'none';
 
-        // Effectuer le rendu LaTeX pour le tableau et le résultat
         MathJax.typesetPromise();
     }
 
