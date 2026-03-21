@@ -29,6 +29,7 @@
             --vp-color: #fd7e14;
             --kn-color: #6f42c1;
             --dark: #2c3e50;
+            --sol-color: #198754;
         }
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #f8f9fa; margin-bottom: 80px; }
         .container { max-width: 1100px; margin: auto; }
@@ -46,15 +47,6 @@
         td { border: 1px solid #333; height: 3cm; padding: 10px; text-align: center; vertical-align: middle; position: relative; }
         .label { font-weight: bold; background-color: #f1f3f5; font-size: 0.9em; }
         
-        /* Style de la croix pour les cellules vides */
-        .cross-cell {
-            background: 
-                linear-gradient(to top stroke, transparent 49.5%, #ccc 49.5%, #ccc 50.5%, transparent 50.5%),
-                linear-gradient(to top right, transparent 49.5%, #ccc 49.5%, #ccc 50.5%, transparent 50.5%),
-                linear-gradient(to bottom right, transparent 49.5%, #ccc 49.5%, #ccc 50.5%, transparent 50.5%);
-            background-repeat: no-repeat;
-        }
-        /* Alternative plus propre avec pseudo-éléments */
         .no-data::before, .no-data::after {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             border-top: 1px solid #ddd; transform-origin: center; z-index: 0;
@@ -68,15 +60,18 @@
         .vp-txt { color: var(--vp-color); }
         .kn-txt { color: var(--kn-color); }
 
-        .btn-gen {
-            padding: 12px 25px; background: var(--dark); color: white; border: none;
-            border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-weight: bold;
+        .btn-gen, .btn-sol {
+            padding: 12px 25px; color: white; border: none;
+            border-radius: 5px; cursor: pointer; margin: 0 10px 20px 10px; font-weight: bold;
         }
+        .btn-gen { background: var(--dark); }
+        .btn-sol { background: var(--sol-color); }
         
         .result-area {
             margin-top: 30px; padding: 25px; background: white;
             border-left: 10px solid var(--dark); border-radius: 5px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 80px;
         }
 
         .copyright-btn {
@@ -105,7 +100,10 @@
         <div id="display-f" style="font-size: 1.8em; margin-top:10px;"></div>
     </div>
 
-    <center><button class="btn-gen" onclick="generate()">Générer un nouvel exercice</button></center>
+    <center>
+        <button class="btn-gen" onclick="generate()">Générer un nouvel exercice</button>
+        <button class="btn-sol" id="btn-solution" onclick="showSolution()">Solution</button>
+    </center>
 
     <table>
         <tr>
@@ -166,13 +164,14 @@
 </div>
 
 <script>
+    let solutionData = {}; // Objet global pour stocker les données de la solution
+
     function toggleModal(show) { document.getElementById('copyrightModal').style.display = show ? 'flex' : 'none'; }
 
     function getRand() {
         let n = 0; while ([0, 1, -1].includes(n)) n = Math.floor(Math.random() * 13) - 6; return n;
     }
 
-    // Modifié pour ajouter systématiquement des parenthèses
     function parenthesize(val, macro) {
         let cleanVal = val.toString().trim();
         return `(${macro}{${cleanVal}})`;
@@ -219,7 +218,7 @@
         const pv = `(\\cv{${v.e}})`;
         const pdv = parenthesize(v.de, '\\cpv');
         const pk = parenthesize(k, '\\ckn');
-        const pn = parenthesize(n, '\\ckn'); // Ajout pour parentheser n
+        const pn = parenthesize(n, '\\ckn');
 
         const cases = [
             { s: `u+v`, ds: `u'+v'`, tex: `(\\cu{${u.e}}) + (\\cv{${v.e}})`, raw: `${pdu} + ${pdv}`, hasV: true },
@@ -233,27 +232,72 @@
 
         const c = cases[Math.floor(Math.random() * cases.length)];
 
+        // Afficher la fonction à dériver
         document.getElementById('display-f').innerHTML = `\\( f(x) = ${clean(c.tex)} \\)`;
-        document.getElementById('f-shape').innerHTML = `\\(${c.s}\\)`;
-        document.getElementById('d-shape').innerHTML = `\\(${c.ds}\\)`;
 
-        setContent('u-exp', `\\(\\cu{${clean(u.e)}}\\)`);
-        setContent('u-d-exp', `\\(\\cpu{${clean(u.de)}}\\)`);
-        setContent('u-form', `\\(\\cu{${u.f}}\\)`);
-        setContent('u-d-form', `\\(\\cpu{${u.df}}\\)`);
+        // Stocker la solution en mémoire
+        solutionData = {
+            fShape: `\\(${c.s}\\)`,
+            dShape: `\\(${c.ds}\\)`,
+            uExp: `\\(\\cu{${clean(u.e)}}\\)`,
+            uDExp: `\\(\\cpu{${clean(u.de)}}\\)`,
+            uForm: `\\(\\cu{${u.f}}\\)`,
+            uDForm: `\\(\\cpu{${u.df}}\\)`,
+            vExp: `\\(\\cv{${clean(v.e)}}\\)`,
+            vDExp: `\\(\\cpv{${clean(v.de)}}\\)`,
+            vForm: `\\(\\cv{${v.f}}\\)`,
+            vDForm: `\\(\\cpv{${v.df}}\\)`,
+            kVal: `\\(\\ckn{${k}}\\)`,
+            nVal: `\\(\\ckn{${n}}\\)`,
+            rawFinal: `\\( f'(x) = ${clean(c.raw)} \\)`,
+            hasV: c.hasV,
+            isK: c.isK,
+            isN: c.isN
+        };
 
-        setContent('v-exp', `\\(\\cv{${clean(v.e)}}\\)`, !c.hasV);
-        setContent('v-d-exp', `\\(\\cpv{${clean(v.de)}}\\)`, !c.hasV);
-        setContent('v-form', `\\(\\cv{${v.f}}\\)`, !c.hasV);
-        setContent('v-d-form', `\\(\\cpv{${v.df}}\\)`, !c.hasV);
+        // Vider le tableau et masquer la solution précédente
+        clearTable();
 
-        setContent('k-val', `\\(\\ckn{${k}}\\)`, !c.isK);
-        setContent('n-val', `\\(\\ckn{${n}}\\)`, !c.isN);
+        // Réactiver le bouton Solution
+        document.getElementById('btn-solution').style.display = 'inline-block';
 
-        document.getElementById('final-raw').innerHTML = `\\( f'(x) = ${clean(c.raw)} \\)`;
-
+        // Effectuer le rendu LaTeX pour la fonction générée
         MathJax.typesetPromise();
     }
+
+    function clearTable() {
+        const idsToClear = ['f-shape', 'd-shape', 'u-exp', 'u-d-exp', 'u-form', 'u-d-form', 'v-exp', 'v-d-exp', 'v-form', 'v-d-form', 'k-val', 'n-val'];
+        idsToClear.forEach(id => setContent(id, '', true));
+        document.getElementById('final-raw').innerHTML = "";
+    }
+
+    function showSolution() {
+        if (!solutionData.fShape) return; // Sécurité si cliqué avant génération
+
+        setContent('f-shape', solutionData.fShape);
+        setContent('d-shape', solutionData.dShape);
+        setContent('u-exp', solutionData.uExp);
+        setContent('u-d-exp', solutionData.uDExp);
+        setContent('u-form', solutionData.uForm);
+        setContent('u-d-form', solutionData.uDForm);
+
+        setContent('v-exp', solutionData.vExp, !solutionData.hasV);
+        setContent('v-d-exp', solutionData.vDExp, !solutionData.hasV);
+        setContent('v-form', solutionData.vForm, !solutionData.hasV);
+        setContent('v-d-form', solutionData.vDForm, !solutionData.hasV);
+
+        setContent('k-val', solutionData.kVal, !solutionData.isK);
+        setContent('n-val', solutionData.nVal, !solutionData.isN);
+
+        document.getElementById('final-raw').innerHTML = solutionData.rawFinal;
+
+        // Cacher le bouton Solution une fois cliqué (optionnel)
+        document.getElementById('btn-solution').style.display = 'none';
+
+        // Effectuer le rendu LaTeX pour le tableau et le résultat
+        MathJax.typesetPromise();
+    }
+
     window.onload = generate;
 </script>
 </body>
