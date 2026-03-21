@@ -172,9 +172,10 @@
         let n = 0; while ([0, 1, -1].includes(n)) n = Math.floor(Math.random() * 13) - 6; return n;
     }
 
+    // Modifié pour ajouter systématiquement des parenthèses
     function parenthesize(val, macro) {
         let cleanVal = val.toString().trim();
-        return cleanVal.startsWith('-') ? `(${macro}{${cleanVal}})` : `${macro}{${cleanVal}}`;
+        return `(${macro}{${cleanVal}})`;
     }
 
     function setContent(id, content, isVoid = false) {
@@ -218,6 +219,7 @@
         const pv = `(\\cv{${v.e}})`;
         const pdv = parenthesize(v.de, '\\cpv');
         const pk = parenthesize(k, '\\ckn');
+        const pn = parenthesize(n, '\\ckn'); // Ajout pour parentheser n
 
         const cases = [
             { s: `u+v`, ds: `u'+v'`, tex: `(\\cu{${u.e}}) + (\\cv{${v.e}})`, raw: `${pdu} + ${pdv}`, hasV: true },
@@ -226,7 +228,7 @@
             { s: `\\dfrac{u}{v}`, ds: `\\dfrac{u'v-v'u}{v^2}`, tex: `\\dfrac{\\cu{${u.e}}}{\\cv{${v.e}}}`, raw: `\\dfrac{${pdu} \\times ${pv} - ${pdv} \\times ${pu}}{${pv}^2}`, hasV: true },
             { s: `\\sqrt{u}`, ds: `\\dfrac{u'}{2\\sqrt{u}}`, tex: `\\sqrt{\\cu{${u.e}}}`, raw: `\\dfrac{${pdu}}{2\\sqrt{\\cu{${u.e}}}}`, hasV: false },
             { s: `k \\times u`, ds: `k \\cdot u'`, tex: `\\ckn{${k}} \\times (\\cu{${u.e}})`, raw: `${pk} \\times ${pdu}`, hasV: false, isK: true },
-            { s: `u^n`, ds: `n \\times u' \\times u^{n-1}`, tex: `(\\cu{${u.e}})^{\\ckn{${n}}}`, raw: `\\ckn{${n}} \\times ${pdu} \\times (\\cu{${u.e}})^{\\ckn{${n-1}}}`, hasV: false, isN: true }
+            { s: `u^n`, ds: `n \\times u' \\times u^{n-1}`, tex: `(\\cu{${u.e}})^{\\ckn{${n}}}`, raw: `${pn} \\times ${pdu} \\times (\\cu{${u.e}})^{\\ckn{${n-1}}}`, hasV: false, isN: true }
         ];
 
         const c = cases[Math.floor(Math.random() * cases.length)];
