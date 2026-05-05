@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours Complet : La Dérivation - 1ère STI2D & STL</title>
+    
+    <!-- Configuration MathJax 3 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                macros: {
+                    dfrac: ['\\displaystyle\\frac{#1}{#2}', 2]
+                }
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --border-color: #dee2e6;
+            --accent-color: #e9ecef;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-size: 16px;
+            --line-height: 1.6;
+        }
+
+        body.dys-mode {
+            --font-family: 'Comic Sans MS', 'OpenDyslexic', sans-serif;
+            --font-size: 18px;
+            --line-height: 2;
+            --letter-spacing: 0.1em;
+            --word-spacing: 0.3em;
+        }
+
+        body.high-contrast {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --primary-color: #4dabf7;
+            --secondary-color: #adb5bd;
+            --border-color: #495057;
+            --accent-color: #2b3035;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size);
+            line-height: var(--line-height);
+            letter-spacing: var(--letter-spacing, normal);
+            word-spacing: var(--word-spacing, normal);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--bg-color);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .definition, .theoreme, .propriete, .methode {
+            background-color: var(--accent-color);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .theoreme { border-left-color: #198754; }
+        .methode { border-left-color: #fd7e14; }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Accessibilité MathJax : on ne cache pas avec display: none */
+        .math-hidden {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--accent-color);
+        }
+
+        canvas {
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+            border-radius: 5px;
+            max-width: 100%;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        body.high-contrast canvas {
+            filter: invert(1);
+        }
+
+        /* Modal Copyright */
+        .modal {
+            visibility: hidden;
+            opacity: 0;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s, visibility 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: var(--bg-color);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            border: 2px solid var(--primary-color);
+        }
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button onclick="toggleDys()">Mode Dyslexie</button>
+        <button onclick="toggleContrast()">Mode Sombre / Contraste</button>
+        <button onclick="zoomText(1)">A+</button>
+        <button onclick="zoomText(-1)">A-</button>
+        <button onclick="openModal()" style="background-color: #6c757d;">Droits d'auteur</button>
+    </div>
+
+    <div class="container" id="course-content">
+        <h1>Cours : La Dérivation (1ère STI2D & STL)</h1>
+        
+        <p>Ce cours présente l'ensemble des notions sur la dérivation requises pour les filières technologiques STI2D et STL. Il s'appuie sur la compréhension du nombre dérivé, des fonctions de référence, des règles de calcul, et de l'étude des variations.</p>
+
+        <h2>1. Taux de variation et Nombre dérivé</h2>
+        
+        <div class="definition">
+            <strong>Définition : Taux de variation</strong><br>
+            Le taux de variation d'une fonction $f$ entre deux réels distincts $a$ et $b$ est donné par la formule :<br>
+            $$\dfrac{f(b)-f(a)}{b-a}$$
+            Si l'on pose $b = a + h$, le taux de variation entre $a$ et $a+h$ s'écrit : $\dfrac{f(a+h)-f(a)}{h}$
+        </div>
+
+        <div class="definition">
+            <strong>Définition : Nombre dérivé</strong><br>
+            Le nombre dérivé $f'(a)$ d'une fonction $f$ en un réel $a$ correspond à la limite du taux de variation de $f$ entre $a$ et $a+h$ lorsque $h$ tend vers $0$ :<br>
+            $$f'(a) = \lim_{h \to 0} \dfrac{f(a+h)-f(a)}{h}$$
+            <strong>Interprétation graphique :</strong> $f'(a)$ est le <strong>coefficient directeur de la tangente</strong> à la courbe représentative de la fonction au point d'abscisse $a$.
+        </div>
+
+        <div class="theoreme">
+            <strong>Propriété : Équation de la tangente</strong><br>
+            La tangente à la courbe représentative d'une fonction $f$ au point d'abscisse $a$ a pour équation :<br>
+            $$y = f'(a)(x-a) + f(a)$$
+        </div>
+
+        <h3>Visualisation d'une tangente</h3>
+        <canvas id="mathCanvas" width="600" height="300"></canvas>
+        <p style="text-align: center; font-size: 0.9em; color: var(--secondary-color);">Illustration d'une courbe et de sa tangente en un point. Le coefficient directeur représente $f'(x)$.</p>
+
+        <h2>2. Fonctions dérivées de référence</h2>
+        <p>Plutôt que de calculer la limite du taux de variation à chaque fois, on utilise les formules de dérivation directes.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Fonction $f(x)$</th>
+                    <th>Dérivée $f'(x)$</th>
+                    <th>Interprétation (Exemple Physique)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$f(x) = k$ (constante)</td>
+                    <td>$f'(x) = 0$</td>
+                    <td>Valeur stable $\rightarrow$ vitesse de variation nulle.</td>
+                </tr>
+                <tr>
+                    <td>$f(x) = mx + p$ (affine)</td>
+                    <td>$f'(x) = m$</td>
+                    <td>Taux d'évolution constant (ex: chauffe constante).</td>
+                </tr>
+                <tr>
+                    <td>$f(x) = ax^2 + bx + c$ (2nd degré)</td>
+                    <td>$f'(x) = 2ax + b$</td>
+                    <td>La dérivée est une fonction affine.</td>
+                </tr>
+                <tr>
+                    <td>$f(x) = ax^3 + bx^2 + cx + d$ (3ème degré)</td>
+                    <td>$f'(x) = 3ax^2 + 2bx + c$</td>
+                    <td>La dérivée est une fonction du second degré.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>3. Règles de calcul des dérivées</h2>
+        
+        <div class="propriete">
+            <strong>Opérations sur les dérivées :</strong>
+            <ul>
+                <li><strong>Somme :</strong> $(u+v)' = u' + v'$</li>
+                <li><strong>Produit par une constante :</strong> $(ku)' = k \times u'$</li>
+                <li><strong>Produit :</strong> $(uv)' = u'v + uv'$</li>
+                <li><strong>Quotient :</strong> $\left(\dfrac{u}{v}\right)' = \dfrac{u'v - uv'}{v^2}$</li>
+                <li><strong>Inverse :</strong> $\left(\dfrac{1}{v}\right)' = \dfrac{-v'}{v^2}$</li>
+            </ul>
+        </div>
+        
+        <div class="methode">
+            <strong>Formules avancées (Puissances et Racines) :</strong>
+            <ul>
+                <li>$(u^n)' = n \times u' \times u^{n-1}$</li>
+                <li>$(\sqrt{u})' = \dfrac{u'}{2\sqrt{u}}$</li>
+            </ul>
+            <em>Remarque importante : Toujours privilégier les fractions irréductibles dans vos calculs finaux et ne jamais utiliser de valeurs approchées.</em>
+        </div>
+
+        <h2>4. Dérivée et variations d'une fonction</h2>
+        
+        <div class="theoreme">
+            <strong>Théorème fondamental (Lien Dérivée - Variations) :</strong><br>
+            Soit $f$ une fonction dérivable sur un intervalle $I$ :
+            <ul>
+                <li>Si $f'(x) > 0$ sur $I$, alors $f$ est <strong>strictement croissante</strong> sur $I$.</li>
+                <li>Si $f'(x) < 0$ sur $I$, alors $f$ est <strong>strictement décroissante</strong> sur $I$.</li>
+                <li>Si $f'(x) = 0$ sur $I$, alors $f$ est constante sur $I$.</li>
+            </ul>
+        </div>
+
+        <div class="theoreme">
+            <strong>Condition d'Extremum :</strong><br>
+            Pour qu'une fonction admette un extremum local (un minimum ou un maximum) en $a$, il faut que la dérivée s'annule en changeant de signe :<br>
+            $$f'(a) = 0 \text{ et } f'(x) \text{ change de signe autour de } a$$
+            La tangente est alors horizontale.
+        </div>
+
+        <h2>5. Applications en Physique et Chimie</h2>
+        <p>En sciences (filières STI2D et STL), la dérivation permet de calculer une vitesse d'évolution instantanée :</p>
+        <ul>
+            <li><strong>Cinématique :</strong> La vitesse $v(t)$ est la dérivée de la position $x(t)$. Donc $v(t) = x'(t)$.</li>
+            <li><strong>Chimie :</strong> La vitesse volumique de réaction est la dérivée de la concentration $C(t)$. Donc $v(t) = C'(t)$.</li>
+        </ul>
+        <p><em>Astuce :</em> La variable $t$ (le temps) remplace le $x$ des mathématiques. On dérive avec exactement les mêmes règles !</p>
+    </div>
+
+    <!-- Modal Droits d'auteur -->
+    <div id="copyrightModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 style="margin-top:0;">⚖️ Droits d'Auteur et Licence d'Utilisation</h2>
+            <p><strong>Auteur :</strong> Yann Merdy (yann.merdy@gmail.com) - Mai 2026</p>
+            <p><strong>Licence d'Utilisation Non Commerciale</strong></p>
+            <p>Ce code HTML/CSS/JavaScript ainsi que le contenu généré par l'application ('Cours sur la dérivation - Première STI2D et STL') sont la propriété intellectuelle exclusive de l'auteur, Yann Merdy.</p>
+            <p><strong>Conditions :</strong></p>
+            <ul>
+                <li><strong>Utilisation Privée et Éducative (Autorisée) :</strong> Vous êtes autorisé.e à utiliser, copier, modifier et distribuer ce code et son contenu uniquement à des fins personnelles, éducatives et non lucratives.</li>
+                <li><strong>Utilisation Commerciale (Interdite) :</strong> Toute utilisation, distribution, intégration ou reproduction du code ou du contenu (total ou partiel) à des fins commerciales, lucratives ou professionnelles est strictement interdite sans un accord écrit préalable et explicite de l'auteur.</li>
+                <li><strong>Attribution :</strong> Toute reproduction ou modification doit conserver la mention de l'auteur originale (Yann Merdy) et la présente notice de droits d'auteur.</li>
+            </ul>
+            <p>Pour toute demande d'utilisation commerciale ou de licence spécifique, veuillez contacter l'auteur à l'adresse indiquée ci-dessus.</p>
+        </div>
+    </div>
+
+    <script>
+        // Gestion de l'accessibilité
+        function toggleDys() {
+            document.body.classList.toggle('dys-mode');
+        }
+
+        function toggleContrast() {
+            document.body.classList.toggle('high-contrast');
+        }
+
+        let currentZoom = 16;
+        function zoomText(step) {
+            currentZoom += step * 2;
+            if (currentZoom < 12) currentZoom = 12;
+            if (currentZoom > 30) currentZoom = 30;
+            document.documentElement.style.setProperty('--font-size', currentZoom + 'px');
+        }
+
+        // Gestion du modal de droits d'auteur
+        function openModal() {
+            document.getElementById('copyrightModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('copyrightModal').classList.remove('active');
+        }
+
+        // Fermer le modal en cliquant à l'extérieur
+        window.onclick = function(event) {
+            let modal = document.getElementById('copyrightModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Dessin dans le Canvas (Courbe et Tangente)
+        function drawCanvas() {
+            const canvas = document.getElementById('mathCanvas');
+            if (!canvas.getContext) return;
+            const ctx = canvas.getContext('2d');
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            const originX = width / 2;
+            const originY = height / 1.5;
+            const scaleX = 40;
+            const scaleY = 40;
+
+            // Fonction f(x) = x^2 / 4
+            function f(x) { return (x * x) / 4; }
+            // Dérivée f'(x) = x / 2
+            function f_prime(x) { return x / 2; }
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Axes
+            ctx.beginPath();
+            ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--secondary-color').trim() || '#aaa';
+            ctx.lineWidth = 1;
+            ctx.moveTo(0, originY);
+            ctx.lineTo(width, originY);
+            ctx.moveTo(originX, 0);
+            ctx.lineTo(originX, height);
+            ctx.stroke();
+
+            // Courbe
+            ctx.beginPath();
+            ctx.strokeStyle = '#0d6efd';
+            ctx.lineWidth = 2;
+            for (let px = 0; px <= width; px++) {
+                let x = (px - originX) / scaleX;
+                let y = f(x);
+                let py = originY - y * scaleY;
+                if (px === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Point A et sa tangente (ex: a = 2)
+            const a = 2;
+            const fa = f(a);
+            const fpa = f_prime(a);
+            
+            const pxA = originX + a * scaleX;
+            const pyA = originY - fa * scaleY;
+
+            // Tangente: y = f'(a)(x-a) + f(a)
+            ctx.beginPath();
+            ctx.strokeStyle = '#dc3545';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            
+            // Calcul de deux points pour la droite
+            let x1 = a - 3;
+            let y1 = fpa * (x1 - a) + fa;
+            let x2 = a + 3;
+            let y2 = fpa * (x2 - a) + fa;
+
+            ctx.moveTo(originX + x1 * scaleX, originY - y1 * scaleY);
+            ctx.lineTo(originX + x2 * scaleX, originY - y2 * scaleY);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset
+
+            // Point
+            ctx.beginPath();
+            ctx.fillStyle = '#198754';
+            ctx.arc(pxA, pyA, 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Labels
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-color').trim() || '#000';
+            ctx.font = '14px Arial';
+            ctx.fillText("Courbe de f", pxA - 60, pyA - 30);
+            ctx.fillStyle = '#dc3545';
+            ctx.fillText("Tangente en A", pxA + 10, pyA + 20);
+        }
+
+        // Dessiner le canvas initialement et au changement de thème
+        window.addEventListener('load', drawCanvas);
+        
+        // Surcharge pour redessiner le canvas quand le contraste change
+        const originalToggleContrast = toggleContrast;
+        window.toggleContrast = function() {
+            originalToggleContrast();
+            // Petit délai pour laisser la transition CSS s'opérer si besoin
+            setTimeout(drawCanvas, 50);
+        }
+    </script>
+</body>
+</html>
+cours_derivation_sti2d_stl.html
+Affichage de cours_derivation_sti2d_stl.html.
